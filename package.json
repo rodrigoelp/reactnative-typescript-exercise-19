@@ -7,10 +7,14 @@
   },
   "dependencies": {
     "react": "16.2.0",
-    "react-native": "0.51.0"
+    "react-native": "0.51.0",
+    "react-native-elements": "^0.18.5",
+    "react-native-vector-icons": "^4.4.3"
   },
   "devDependencies": {
     "@types/react": "^16.0.34",
-    "@types/react-native": "^0.51.9"
+    "@types/react-native": "^0.51.9",
+    "@types/react-native-elements": "^0.18.0",
+    "@types/react-native-vector-icons": "^4.4.2"
   }
 }
