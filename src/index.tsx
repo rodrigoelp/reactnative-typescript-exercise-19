@@ -29,22 +29,15 @@ enum AppColors {
     Space = "#303746",
 }
 
-enum AssetPath {
-    FullImage = "./assets/fullImage.png",
-    Stars = "./assets/stars.png", // 
-    Sky = "./assets/sky.png",
-    Planets = "./assets/planets.png", // 
-    WorldAndRose = "./assets/princeWorld.png",
-    Prince = "./assets/travelingPrince.png"
-}
-
 const appFontFamily = Platform.select({
     ios: "Zapfino",
     android: "Roboto",
 });
 
 interface AppShellState {
+    starsOld: Asset;
     stars: Asset;
+    starsFlickering: Asset;
     planets: Asset;
     sky: Asset;
     world: Asset;
@@ -57,7 +50,9 @@ class AppShell extends React.Component<{}, AppShellState> {
         super(props);
 
         this.state = {
-            stars: new Asset(require("./assets/stars.png"), globalScale, globalScale, { width: 1682 , height: 2480 }),
+            starsOld: new Asset(require("./assets/stars.png"), globalScale, globalScale, { width: 1682 , height: 2480 }),
+            starsFlickering: new Asset(require("./assets/stars1.png"), globalScale, globalScale, { width: 1682 , height: 2480 }),
+            stars: new Asset(require("./assets/stars2.png"), globalScale, globalScale, { width: 1682 , height: 2480 }),
             planets: new Asset(require("./assets/planets.png"), globalScale, globalScale, { width: 382 , height: 299 }),
             sky: new Asset(require("./assets/sky.png"), .26, .26, { width: 1654 , height: 1260 }),
             world: new Asset(require("./assets/princeWorld.png"), globalScale, globalScale, { width: 1263 , height: 1100 }),
@@ -68,12 +63,15 @@ class AppShell extends React.Component<{}, AppShellState> {
 
     public render() {
         const h = window.height, w = window.width;
-        const { stars, planets, sky, world, prince, all } = this.state;
+        const { stars, starsFlickering, starsOld, planets, sky, world, prince } = this.state;
         return (
             <View style={{ flex: 1, backgroundColor: AppColors.Space, }}>
                 <View style={{ flex: 1, position: "absolute", height: h, width: w, transform: [{ translateY: h - stars.size.height }] }}>
                     <Image source={stars.asset}
                         style={{ position: "absolute", height: stars.size.height, width: stars.size.width }}
+                    />
+                    <Image source={starsFlickering.asset}
+                        style={{ position: "absolute", height: starsFlickering.size.height, width: starsFlickering.size.width }}
                     />
                     <Image source={sky.asset}
                         style={{
@@ -105,9 +103,11 @@ class AppShell extends React.Component<{}, AppShellState> {
                     />
                 </View>
                 <View style={{ flex: 1, margin: 40, backgroundColor: "transparent" }}>
-                    <Text style={{ flex: 1, fontSize: 24, fontFamily: appFontFamily, textAlign: "center", textAlignVertical: "center", color: "white" }}>
-                        Do you know the story of 'Le Petit Prince'?
+                    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+                        <Text style={{ fontSize: 24, fontFamily: appFontFamily, textAlign: "center", textAlignVertical: "center", color: "white" }}>
+                            Do you know the story of 'Le Petit Prince'?
                     </Text>
+                    </View>
                     <View style={{ alignItems: "center", justifyContent: "center" }}>
                         <Button title="Want to know more" onPress={() => { }} />
                     </View>
