@@ -1,5 +1,6 @@
 import * as React from "react";
-import { AppRegistry, View, Dimensions, Image, ScaledSize, Animated, Text, Button, Platform } from "react-native";
+import { AppRegistry, View, Dimensions, Image, ScaledSize, Animated, Text, Platform } from "react-native";
+import { Button } from "react-native-elements";
 
 interface AssetSize { height: number, width: number }
 
@@ -109,7 +110,7 @@ class AppShell extends React.Component<{}, AppShellState> {
                     </Text>
                     </View>
                     <View style={{ alignItems: "center", justifyContent: "center" }}>
-                        <Button title="Want to know more" onPress={() => { }} />
+                        <Button title="Want to know more" backgroundColor="#397af8" borderRadius={8} iconRight={{ name: "question", type: "font-awesome" }} large={true} onPress={() => { }} />
                     </View>
                 </View>
             </View>
