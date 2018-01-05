@@ -121,12 +121,20 @@ class AppShell extends React.Component<{}, AppShellState> {
                         </Text>
                     </View>
                     <View style={{ alignItems: "center" }}>
-                        <Button title="Sure, why not" backgroundColor="#8ad2c4" borderRadius={8} iconRight={{ name: "question", type: "font-awesome" }} large={true} onPress={() => { }} />
+                        <Button title="Sure, why not" backgroundColor="#8ad2c4" borderRadius={8} iconRight={{ name: "question", type: "font-awesome" }} large={true} onPress={this.showMeTheCharacter} />
                     </View>
                 </View>
             </View>
         );
     }
+
+    showMeTheCharacter = () => {
+        this.setState({
+            ...this.state,
+            canvasOpacity: 1,
+            starterOpacity: 0
+        });
+    };
 }
 
 AppRegistry.registerComponent("basicAnimations", () => AppShell);
