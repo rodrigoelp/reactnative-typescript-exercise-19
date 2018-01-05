@@ -46,47 +46,56 @@ interface AppShellState {
 }
 
 class AppShell extends React.Component<{}, AppShellState> {
+    // properties dealing with the styles
+    private canvasStyle: ViewStyle;
+    private starsStyle: ViewStyle;
+    private flickeringStarStyle: ViewStyle;
+    private skyStyle: ViewStyle;
+    private worldStyle: ViewStyle;
+    private planetStyle: ViewStyle;
+    private princeStyle: ViewStyle;
+
     private canvasOpacity2: Animated.Value;
 
     constructor(props: any) {
         super(props);
 
+        const starsOld = new Asset(require("./assets/stars.png"), globalScale, globalScale, { width: 1682 , height: 2480 });
+        const starsFlickering = new Asset(require("./assets/stars1.png"), globalScale, globalScale, { width: 1682 , height: 2480 });
+        const stars = new Asset(require("./assets/stars2.png"), globalScale, globalScale, { width: 1682 , height: 2480 });
+        const planets = new Asset(require("./assets/planets.png"), globalScale, globalScale, { width: 382 , height: 299 });
+        const sky = new Asset(require("./assets/sky.png"), .26, .26, { width: 1654 , height: 1260 });
+        const world = new Asset(require("./assets/princeWorld.png"), globalScale, globalScale, { width: 1263 , height: 1100 });
+        const prince = new Asset(require("./assets/travelingPrince.png"), globalScale, globalScale, { width: 1264 , height: 1372 });
+
+        const h = window.height, w = window.width;
+        this.canvasStyle = { flex: 1, height: h, width: w, transform: [{ translateY: h - stars.size.height }] };
+        this.starsStyle = { height: stars.size.height, width: stars.size.width };
+        this.flickeringStarStyle = { height: starsFlickering.size.height, width: starsFlickering.size.width };
+        this.skyStyle = { height: sky.size.height, width: sky.size.width, transform: [{ translateX: 0 }, { translateY: stars.size.height - sky.size.height }], };
+        this.worldStyle = { height: world.size.height, width: world.size.width, transform: [{ translateX: 0 }, { translateY: stars.size.height - world.size.height }], };
+        this.planetStyle = { height: planets.size.height, width: planets.size.width, transform: [{ translateX: w - planets.size.width }, { translateY: (h - 150) - planets.size.height }], };
+        this.princeStyle = { height: prince.size.height, width: prince.size.width, transform: [{ translateX: 60 }, { translateY: 22 }], };
+
         this.canvasOpacity2 = new Animated.Value(0);
 
         this.state = {
             // definiting assets
-            starsOld: new Asset(require("./assets/stars.png"), globalScale, globalScale, { width: 1682 , height: 2480 }),
-            starsFlickering: new Asset(require("./assets/stars1.png"), globalScale, globalScale, { width: 1682 , height: 2480 }),
-            stars: new Asset(require("./assets/stars2.png"), globalScale, globalScale, { width: 1682 , height: 2480 }),
-            planets: new Asset(require("./assets/planets.png"), globalScale, globalScale, { width: 382 , height: 299 }),
-            sky: new Asset(require("./assets/sky.png"), .26, .26, { width: 1654 , height: 1260 }),
-            world: new Asset(require("./assets/princeWorld.png"), globalScale, globalScale, { width: 1263 , height: 1100 }),
-            prince: new Asset(require("./assets/travelingPrince.png"), globalScale, globalScale, { width: 1264 , height: 1372 }),
+            starsOld, stars, starsFlickering, planets, prince, sky, world 
         };
     }
 
     public render() {
-        const h = window.height, w = window.width;
         const { stars, starsFlickering, starsOld, planets, sky, world, prince } = this.state;
-        // defining some of the styles.
-        const canvasStyle: ViewStyle = { flex: 1, height: h, width: w, transform: [{ translateY: h - stars.size.height }] };
-        const starsStyle: ViewStyle = { height: stars.size.height, width: stars.size.width };
-        const flickeringStarStyle: ViewStyle = { height: starsFlickering.size.height, width: starsFlickering.size.width };
-        const skyStyle: ViewStyle = { height: sky.size.height, width: sky.size.width, transform: [{ translateX: 0 }, { translateY: stars.size.height - sky.size.height }], };
-        const worldStyle: ViewStyle = { height: world.size.height, width: world.size.width, transform: [{ translateX: 0 }, { translateY: stars.size.height - world.size.height }], };
-        const planetStyle: ViewStyle = { height: planets.size.height, width: planets.size.width, transform: [{ translateX: w - planets.size.width }, { translateY: (h - 150) - planets.size.height }], };
-        const princeStyle: ViewStyle = { height: prince.size.height, width: prince.size.width, transform: [{ translateX: 60 }, { translateY: 22 }], };
-
-        // unfortunately, typescript definition does not accept the animated types, meaning we need to do this hack while that is fixed.
         return (
             <View style={styles.container}>
-                <View style={canvasStyle}>
-                    <Image source={stars.asset} style={[styles.customPosition , starsStyle]} />
-                    <Image source={starsFlickering.asset} style={[styles.customPosition, flickeringStarStyle]} />
-                    <Animated.Image source={sky.asset} style={[styles.customPosition, skyStyle]} />
-                    <Image source={world.asset} style={[styles.customPosition, worldStyle]} />
-                    <Image source={planets.asset} style={[styles.customPosition, planetStyle]} />
-                    <Image source={prince.asset} style={[styles.customPosition, princeStyle]} />
+                <View style={this.canvasStyle}>
+                    <Image source={stars.asset} style={[styles.customPosition, this.starsStyle]} />
+                    <Image source={starsFlickering.asset} style={[styles.customPosition, this.flickeringStarStyle]} />
+                    <Animated.Image source={sky.asset} style={[styles.customPosition, this.skyStyle]} />
+                    <Image source={world.asset} style={[styles.customPosition, this.worldStyle]} />
+                    <Image source={planets.asset} style={[styles.customPosition, this.planetStyle]} />
+                    <Image source={prince.asset} style={[styles.customPosition, this.princeStyle]} />
                 </View>
                 <View style={[styles.starterArea]}>
                     <View style={styles.starterTextView}>
