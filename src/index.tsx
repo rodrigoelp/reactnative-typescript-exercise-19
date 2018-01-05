@@ -55,7 +55,8 @@ class AppShell extends React.Component<{}, AppShellState> {
     private planetStyle: ViewStyle;
     private princeStyle: ViewStyle;
 
-    private canvasOpacity2: Animated.Value;
+    private drawingOpacityValue: Animated.Value;
+    private introOpacityValue: Animated.Value;
 
     constructor(props: any) {
         super(props);
@@ -77,50 +78,52 @@ class AppShell extends React.Component<{}, AppShellState> {
         this.planetStyle = { height: planets.size.height, width: planets.size.width, transform: [{ translateX: w - planets.size.width }, { translateY: (h - 150) - planets.size.height }], };
         this.princeStyle = { height: prince.size.height, width: prince.size.width, transform: [{ translateX: 60 }, { translateY: 22 }], };
 
-        this.canvasOpacity2 = new Animated.Value(0);
+        this.drawingOpacityValue = new Animated.Value(0);
+        this.introOpacityValue = new Animated.Value(1);
 
         this.state = {
             // definiting assets
-            starsOld, stars, starsFlickering, planets, prince, sky, world 
+            starsOld, stars, starsFlickering, planets, prince, sky, world
         };
     }
 
     public render() {
         const { stars, starsFlickering, starsOld, planets, sky, world, prince } = this.state;
+        const drawingOpacity = this.drawingOpacityValue.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
+        const introOpacity = this.introOpacityValue.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
+
         return (
             <View style={styles.container}>
-                <View style={this.canvasStyle}>
+                <Animated.View style={[this.canvasStyle, { opacity: drawingOpacity }]}>
                     <Image source={stars.asset} style={[styles.customPosition, this.starsStyle]} />
                     <Image source={starsFlickering.asset} style={[styles.customPosition, this.flickeringStarStyle]} />
-                    <Animated.Image source={sky.asset} style={[styles.customPosition, this.skyStyle]} />
+                    <Image source={sky.asset} style={[styles.customPosition, this.skyStyle]} />
                     <Image source={world.asset} style={[styles.customPosition, this.worldStyle]} />
                     <Image source={planets.asset} style={[styles.customPosition, this.planetStyle]} />
                     <Image source={prince.asset} style={[styles.customPosition, this.princeStyle]} />
-                </View>
-                <View style={[styles.starterArea]}>
-                    <View style={styles.starterTextView}>
-                        <Text style={styles.starterTitle}>
+                </Animated.View>
+                <Animated.View style={[styles.introArea, { opacity: introOpacity }]}>
+                    <View style={styles.introTextView}>
+                        <Text style={styles.introTitle}>
                             Do you know{"\n"}who is{"\n"}Le Petit Prince??
                         </Text>
                     </View>
                     <View style={styles.containerWithCentredItems}>
                         <Button title="Sure, why not" backgroundColor="#8ad2c4" borderRadius={8} iconRight={{ name: "question", type: "font-awesome" }} large={true} onPress={this.showMeTheCharacter} />
                     </View>
-                </View>
+                </Animated.View>
             </View>
         );
     }
 
     showMeTheCharacter = () => {
-        this.canvasOpacity2.setValue(0);
-        Animated.timing(
-            this.canvasOpacity2,
-            {
-                toValue: 1,
-                duration: 1500,
-                easing: Easing.bounce
-            }
-        ).start();
+        this.introOpacityValue.setValue(1);
+        this.drawingOpacityValue.setValue(0);
+
+        Animated.parallel([
+            Animated.timing(this.introOpacityValue, { toValue: 0, duration: 1000, easing: Easing.linear }),
+            Animated.timing(this.drawingOpacityValue, { toValue: 1, duration: 4000, easing: Easing.exp })
+        ]).start();
     };
 }
 
@@ -128,9 +131,9 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: AppColors.Space, },
     containerWithCentredItems: { alignItems: "center" },
     customPosition: { position: "absolute" },
-    starterArea: { flex: 1, marginBottom: 16, marginHorizontal: 16, backgroundColor: "transparent" },
-    starterTextView: { flex: 1, alignItems: "center", justifyContent: "center" },
-    starterTitle: { fontSize: 20, fontFamily: appFontFamily, textAlign: "center", textAlignVertical: "center", color: "white" }
+    introArea: { flex: 1, marginBottom: 16, marginHorizontal: 16, backgroundColor: "transparent" },
+    introTextView: { flex: 1, alignItems: "center", justifyContent: "center" },
+    introTitle: { fontSize: 20, fontFamily: appFontFamily, textAlign: "center", textAlignVertical: "center", color: "white" }
 });
 
 AppRegistry.registerComponent("basicAnimations", () => AppShell);
