@@ -43,7 +43,9 @@ interface AppShellState {
     sky: Asset;
     world: Asset;
     prince: Asset;
-    all: Asset;
+    // all: Asset;
+    canvasOpacity: number;
+    starterOpacity: number;
 }
 
 class AppShell extends React.Component<{}, AppShellState> {
@@ -51,6 +53,7 @@ class AppShell extends React.Component<{}, AppShellState> {
         super(props);
 
         this.state = {
+            // definiting assets
             starsOld: new Asset(require("./assets/stars.png"), globalScale, globalScale, { width: 1682 , height: 2480 }),
             starsFlickering: new Asset(require("./assets/stars1.png"), globalScale, globalScale, { width: 1682 , height: 2480 }),
             stars: new Asset(require("./assets/stars2.png"), globalScale, globalScale, { width: 1682 , height: 2480 }),
@@ -58,7 +61,11 @@ class AppShell extends React.Component<{}, AppShellState> {
             sky: new Asset(require("./assets/sky.png"), .26, .26, { width: 1654 , height: 1260 }),
             world: new Asset(require("./assets/princeWorld.png"), globalScale, globalScale, { width: 1263 , height: 1100 }),
             prince: new Asset(require("./assets/travelingPrince.png"), globalScale, globalScale, { width: 1264 , height: 1372 }),
-            all: new Asset(require("./assets/fullImage.png"), scaleX, scaleY, { width: 1682 , height: 2480 }),
+            // all: new Asset(require("./assets/fullImage.png"), scaleX, scaleY, { width: 1682 , height: 2480 }),
+
+            // animation attributes
+            canvasOpacity: 0,
+            starterOpacity: 1,
         };
     }
 
@@ -78,39 +85,43 @@ class AppShell extends React.Component<{}, AppShellState> {
                         style={{
                             position: "absolute",
                             height: sky.size.height, width: sky.size.width,
-                            transform: [{ translateX: 0 }, { translateY: stars.size.height - sky.size.height }]
+                            transform: [{ translateX: 0 }, { translateY: stars.size.height - sky.size.height }],
+                            opacity: this.state.canvasOpacity
                         }}
                     />
                     <Image source={world.asset}
                         style={{
                             position: "absolute",
                             height: world.size.height, width: world.size.width,
-                            transform: [{ translateX: 0 }, { translateY: stars.size.height - world.size.height }]
+                            transform: [{ translateX: 0 }, { translateY: stars.size.height - world.size.height }],
+                            opacity: this.state.canvasOpacity
                         }}
                     />
                     <Image source={planets.asset}
                         style={{
                             position: "absolute",
                             height: planets.size.height, width: planets.size.width,
-                            transform: [{ translateX: w - planets.size.width }, { translateY: (h - 150) - planets.size.height }]
+                            transform: [{ translateX: w - planets.size.width }, { translateY: (h - 150) - planets.size.height }],
+                            opacity: this.state.canvasOpacity
                         }}
                     />
                     <Image source={prince.asset}
                         style={{
                             position: "absolute",
                             height: prince.size.height, width: prince.size.width,
-                            transform: [{ translateX: 60 }, { translateY: 22 }]
+                            transform: [{ translateX: 60 }, { translateY: 22 }],
+                            opacity: this.state.canvasOpacity
                         }}
                     />
                 </View>
-                <View style={{ flex: 1, margin: 40, backgroundColor: "transparent" }}>
+                <View style={{ flex: 1, marginBottom: 16, marginHorizontal: 16, backgroundColor: "transparent", opacity: this.state.starterOpacity }}>
                     <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                        <Text style={{ fontSize: 24, fontFamily: appFontFamily, textAlign: "center", textAlignVertical: "center", color: "white" }}>
-                            Do you know the story of 'Le Petit Prince'?
-                    </Text>
+                        <Text style={{ fontSize: 20, fontFamily: appFontFamily, textAlign: "center", color: "white" }}>
+                            Do you know{"\n"}who is{"\n"}Le Petit Prince??
+                        </Text>
                     </View>
-                    <View style={{ alignItems: "center", justifyContent: "center" }}>
-                        <Button title="Want to know more" backgroundColor="#397af8" borderRadius={8} iconRight={{ name: "question", type: "font-awesome" }} large={true} onPress={() => { }} />
+                    <View style={{ alignItems: "center" }}>
+                        <Button title="Sure, why not" backgroundColor="#8ad2c4" borderRadius={8} iconRight={{ name: "question", type: "font-awesome" }} large={true} onPress={() => { }} />
                     </View>
                 </View>
             </View>
