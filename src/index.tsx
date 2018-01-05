@@ -94,14 +94,14 @@ class AppShell extends React.Component<{}, AppShellState> {
 
         return (
             <View style={styles.container}>
-                <Animated.View style={[this.canvasStyle, { opacity: drawingOpacity }]}>
+                <View style={this.canvasStyle}>
                     <Image source={stars.asset} style={[styles.customPosition, this.starsStyle]} />
                     <Image source={starsFlickering.asset} style={[styles.customPosition, this.flickeringStarStyle]} />
-                    <Image source={sky.asset} style={[styles.customPosition, this.skyStyle]} />
-                    <Image source={world.asset} style={[styles.customPosition, this.worldStyle]} />
-                    <Image source={planets.asset} style={[styles.customPosition, this.planetStyle]} />
-                    <Image source={prince.asset} style={[styles.customPosition, this.princeStyle]} />
-                </Animated.View>
+                    <Animated.Image source={sky.asset} style={[styles.customPosition, this.skyStyle, { opacity: drawingOpacity }]} />
+                    <Animated.Image source={world.asset} style={[styles.customPosition, this.worldStyle, { opacity: drawingOpacity }]} />
+                    <Animated.Image source={planets.asset} style={[styles.customPosition, this.planetStyle, { opacity: drawingOpacity }]} />
+                    <Animated.Image source={prince.asset} style={[styles.customPosition, this.princeStyle, { opacity: drawingOpacity }]} />
+                </View>
                 <Animated.View style={[styles.introArea, { opacity: introOpacity }]}>
                     <View style={styles.introTextView}>
                         <Text style={styles.introTitle}>
