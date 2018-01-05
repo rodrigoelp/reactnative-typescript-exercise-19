@@ -1,5 +1,5 @@
 import * as React from "react";
-import { AppRegistry, View, Dimensions, Image, ScaledSize, Animated, Text, Platform } from "react-native";
+import { AppRegistry, View, Dimensions, Image, ScaledSize, Animated, Text, Platform, ViewStyle, Easing, StyleSheet } from "react-native";
 import { Button } from "react-native-elements";
 
 interface AssetSize { height: number, width: number }
@@ -43,14 +43,15 @@ interface AppShellState {
     sky: Asset;
     world: Asset;
     prince: Asset;
-    // all: Asset;
-    canvasOpacity: number;
-    starterOpacity: number;
 }
 
 class AppShell extends React.Component<{}, AppShellState> {
+    private canvasOpacity2: Animated.Value;
+
     constructor(props: any) {
         super(props);
+
+        this.canvasOpacity2 = new Animated.Value(0);
 
         this.state = {
             // definiting assets
@@ -61,66 +62,39 @@ class AppShell extends React.Component<{}, AppShellState> {
             sky: new Asset(require("./assets/sky.png"), .26, .26, { width: 1654 , height: 1260 }),
             world: new Asset(require("./assets/princeWorld.png"), globalScale, globalScale, { width: 1263 , height: 1100 }),
             prince: new Asset(require("./assets/travelingPrince.png"), globalScale, globalScale, { width: 1264 , height: 1372 }),
-            // all: new Asset(require("./assets/fullImage.png"), scaleX, scaleY, { width: 1682 , height: 2480 }),
-
-            // animation attributes
-            canvasOpacity: 0,
-            starterOpacity: 1,
         };
     }
 
     public render() {
         const h = window.height, w = window.width;
         const { stars, starsFlickering, starsOld, planets, sky, world, prince } = this.state;
+        // defining some of the styles.
+        const canvasStyle: ViewStyle = { flex: 1, height: h, width: w, transform: [{ translateY: h - stars.size.height }] };
+        const starsStyle: ViewStyle = { height: stars.size.height, width: stars.size.width };
+        const flickeringStarStyle: ViewStyle = { height: starsFlickering.size.height, width: starsFlickering.size.width };
+        const skyStyle: ViewStyle = { height: sky.size.height, width: sky.size.width, transform: [{ translateX: 0 }, { translateY: stars.size.height - sky.size.height }], };
+        const worldStyle: ViewStyle = { height: world.size.height, width: world.size.width, transform: [{ translateX: 0 }, { translateY: stars.size.height - world.size.height }], };
+        const planetStyle: ViewStyle = { height: planets.size.height, width: planets.size.width, transform: [{ translateX: w - planets.size.width }, { translateY: (h - 150) - planets.size.height }], };
+        const princeStyle: ViewStyle = { height: prince.size.height, width: prince.size.width, transform: [{ translateX: 60 }, { translateY: 22 }], };
+
+        // unfortunately, typescript definition does not accept the animated types, meaning we need to do this hack while that is fixed.
         return (
-            <View style={{ flex: 1, backgroundColor: AppColors.Space, }}>
-                <View style={{ flex: 1, position: "absolute", height: h, width: w, transform: [{ translateY: h - stars.size.height }] }}>
-                    <Image source={stars.asset}
-                        style={{ position: "absolute", height: stars.size.height, width: stars.size.width }}
-                    />
-                    <Image source={starsFlickering.asset}
-                        style={{ position: "absolute", height: starsFlickering.size.height, width: starsFlickering.size.width }}
-                    />
-                    <Image source={sky.asset}
-                        style={{
-                            position: "absolute",
-                            height: sky.size.height, width: sky.size.width,
-                            transform: [{ translateX: 0 }, { translateY: stars.size.height - sky.size.height }],
-                            opacity: this.state.canvasOpacity
-                        }}
-                    />
-                    <Image source={world.asset}
-                        style={{
-                            position: "absolute",
-                            height: world.size.height, width: world.size.width,
-                            transform: [{ translateX: 0 }, { translateY: stars.size.height - world.size.height }],
-                            opacity: this.state.canvasOpacity
-                        }}
-                    />
-                    <Image source={planets.asset}
-                        style={{
-                            position: "absolute",
-                            height: planets.size.height, width: planets.size.width,
-                            transform: [{ translateX: w - planets.size.width }, { translateY: (h - 150) - planets.size.height }],
-                            opacity: this.state.canvasOpacity
-                        }}
-                    />
-                    <Image source={prince.asset}
-                        style={{
-                            position: "absolute",
-                            height: prince.size.height, width: prince.size.width,
-                            transform: [{ translateX: 60 }, { translateY: 22 }],
-                            opacity: this.state.canvasOpacity
-                        }}
-                    />
+            <View style={styles.container}>
+                <View style={canvasStyle}>
+                    <Image source={stars.asset} style={[styles.customPosition , starsStyle]} />
+                    <Image source={starsFlickering.asset} style={[styles.customPosition, flickeringStarStyle]} />
+                    <Animated.Image source={sky.asset} style={[styles.customPosition, skyStyle]} />
+                    <Image source={world.asset} style={[styles.customPosition, worldStyle]} />
+                    <Image source={planets.asset} style={[styles.customPosition, planetStyle]} />
+                    <Image source={prince.asset} style={[styles.customPosition, princeStyle]} />
                 </View>
-                <View style={{ flex: 1, marginBottom: 16, marginHorizontal: 16, backgroundColor: "transparent", opacity: this.state.starterOpacity }}>
-                    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                        <Text style={{ fontSize: 20, fontFamily: appFontFamily, textAlign: "center", color: "white" }}>
+                <View style={[styles.starterArea]}>
+                    <View style={styles.starterTextView}>
+                        <Text style={styles.starterTitle}>
                             Do you know{"\n"}who is{"\n"}Le Petit Prince??
                         </Text>
                     </View>
-                    <View style={{ alignItems: "center" }}>
+                    <View style={styles.containerWithCentredItems}>
                         <Button title="Sure, why not" backgroundColor="#8ad2c4" borderRadius={8} iconRight={{ name: "question", type: "font-awesome" }} large={true} onPress={this.showMeTheCharacter} />
                     </View>
                 </View>
@@ -129,12 +103,25 @@ class AppShell extends React.Component<{}, AppShellState> {
     }
 
     showMeTheCharacter = () => {
-        this.setState({
-            ...this.state,
-            canvasOpacity: 1,
-            starterOpacity: 0
-        });
+        this.canvasOpacity2.setValue(0);
+        Animated.timing(
+            this.canvasOpacity2,
+            {
+                toValue: 1,
+                duration: 1500,
+                easing: Easing.bounce
+            }
+        ).start();
     };
 }
+
+const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: AppColors.Space, },
+    containerWithCentredItems: { alignItems: "center" },
+    customPosition: { position: "absolute" },
+    starterArea: { flex: 1, marginBottom: 16, marginHorizontal: 16, backgroundColor: "transparent" },
+    starterTextView: { flex: 1, alignItems: "center", justifyContent: "center" },
+    starterTitle: { fontSize: 20, fontFamily: appFontFamily, textAlign: "center", textAlignVertical: "center", color: "white" }
+});
 
 AppRegistry.registerComponent("basicAnimations", () => AppShell);
