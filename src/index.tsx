@@ -172,19 +172,29 @@ class AppShell extends React.Component<{}, AppShellState> {
         this.flickerOpacityValue.setValue(0);
 
         Animated.sequence([
-            Animated.timing(this.introOpacityValue, { toValue: 0, duration: 1500, easing: Easing.linear }),
+            // fading out the landing view.
+            Animated.timing(this.introOpacityValue, { toValue: 0, duration: 750, easing: Easing.linear }),
+            // Starting the animations... I want the stars (some) to tinkle on the background
+            // as the other animation is playing.
             Animated.parallel([
-                Animated.loop(Animated.timing(this.flickerOpacityValue, { easing: Easing.linear, duration: 5000, toValue: 0 }), { iterations: 6000 }),
+                // tinkling stars
+                Animated.loop(Animated.timing(this.flickerOpacityValue, { easing: Easing.linear, duration: 5000, toValue: 0 }), { iterations: 2000 }),
+                // rest of the animation
                 Animated.sequence([
+                    // first, let's get the clouds to pop up.
                     Animated.parallel([
                         Animated.timing(this.cloudOpacityValue, { toValue: 1, duration: 1500, easing: Easing.linear }),
                         Animated.timing(this.cloudTranslationValue, { toValue: this.cloud.intendedPosition, duration: 1500, easing: Easing.circle })
                     ]),
+                    // the planets from the side would be a good idea as well...
                     Animated.parallel([
-                        Animated.timing(this.planetsOpacityValue, { toValue: 1, duration: 1500, easing: Easing.exp }),
+                        Animated.timing(this.planetsOpacityValue, { toValue: 1, duration: 1500, easing: Easing.linear }),
                         Animated.timing(this.planetsTranslationValue, { toValue: this.planets.intendedPosition, duration: 2000, easing: Easing.bounce }),
                     ]),
+                    // then, we need the planet hosting the rose (his love)
                     Animated.timing(this.worldTranslationValue, { toValue: this.world.intendedPosition, duration: 2000, easing: Easing.ease }),
+                    // finally, let's get the prince to drop from the sky onto the planet and hover there, looking to
+                    // its beautiful rose.
                     Animated.sequence([
                         Animated.timing(this.princeTranslationValue, { toValue: this.prince.intendedPosition, duration: 3000, easing: Easing.linear }),
                         Animated.parallel([
