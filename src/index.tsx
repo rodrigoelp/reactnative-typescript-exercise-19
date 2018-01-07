@@ -71,6 +71,9 @@ class AppShell extends React.Component<{}, AppShellState> {
     private worldTranslationValue: Animated.ValueXY;
     private planetsTranslationValue: Animated.ValueXY;
     private princeTranslationValue: Animated.ValueXY;
+    private princeTranslationOpacityValue: Animated.Value;
+    private princeHoveringValue: Animated.ValueXY;
+    private princeHoveringOpacityValue: Animated.Value;
 
     constructor(props: any) {
         super(props);
@@ -112,6 +115,9 @@ class AppShell extends React.Component<{}, AppShellState> {
         this.planetsOpacityValue = new Animated.Value(0);
         this.planetsTranslationValue = new Animated.ValueXY(this.planets.initialPosition);
         this.princeTranslationValue = new Animated.ValueXY(this.prince.initialPosition);
+        this.princeTranslationOpacityValue = new Animated.Value(1);
+        this.princeHoveringValue = new Animated.ValueXY(this.prince.intendedPosition);
+        this.princeHoveringOpacityValue = new Animated.Value(0);
 
         this.state = {
             // definiting assets
@@ -121,14 +127,18 @@ class AppShell extends React.Component<{}, AppShellState> {
 
     public render() {
         const { stars, flickeringStars, starsOld, planets, cloud, world, prince } = this.state;
-        const planetsOpacity = this.planetsOpacityValue.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
-        const introOpacity = this.introOpacityValue.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
+        const opacityConfig: Animated.InterpolationConfigType = { inputRange: [0, 1], outputRange: [0, 1] };
+        const planetsOpacity = this.planetsOpacityValue.interpolate(opacityConfig);
+        const introOpacity = this.introOpacityValue.interpolate(opacityConfig);
         const flickerOpacity = this.flickerOpacityValue.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, 1, 0] });
-        const cloudOpacity = this.cloudOpacityValue.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
+        const cloudOpacity = this.cloudOpacityValue.interpolate(opacityConfig);
         const cloudTransform = this.cloudTranslationValue.getTranslateTransform();
         const worldTransform = this.worldTranslationValue.getTranslateTransform();
         const planetTransform = this.planetsTranslationValue.getTranslateTransform();
-        const princeTransform = this.princeTranslationValue.getTranslateTransform();
+        const landingPrinceTransform = this.princeTranslationValue.getTranslateTransform();
+        const landingPrinceOpacity = this.princeTranslationOpacityValue.interpolate(opacityConfig)
+        const hoveringPrinceTransform = this.princeHoveringValue.getTranslateTransform();
+        const hoveringPrinceOpacity = this.princeHoveringOpacityValue.interpolate(opacityConfig);
 
         return (
             <View style={styles.container}>
@@ -138,7 +148,8 @@ class AppShell extends React.Component<{}, AppShellState> {
                     <Animated.Image source={cloud.asset} style={[styles.customPosition, this.cloudStyle, { opacity: cloudOpacity, transform: cloudTransform }]} />
                     <Animated.Image source={world.asset} style={[styles.customPosition, this.worldStyle, { transform: worldTransform }]} />
                     <Animated.Image source={planets.asset} style={[styles.customPosition, this.planetStyle, { opacity: planetsOpacity, transform: planetTransform }]} />
-                    <Animated.Image source={prince.asset} style={[styles.customPosition, this.princeStyle, { transform: princeTransform }]} />
+                    <Animated.Image source={prince.asset} style={[styles.customPosition, this.princeStyle, { transform: landingPrinceTransform, opacity: landingPrinceOpacity }]} />
+                    <Animated.Image source={prince.asset} style={[styles.customPosition, this.princeStyle, { transform: hoveringPrinceTransform, opacity: hoveringPrinceOpacity }]} />
                 </View>
                 <Animated.View style={[styles.introArea, { opacity: introOpacity }]}>
                     <View style={styles.introTextView}>
@@ -166,23 +177,29 @@ class AppShell extends React.Component<{}, AppShellState> {
                 Animated.loop(Animated.timing(this.flickerOpacityValue, { easing: Easing.linear, duration: 5000, toValue: 0 }), { iterations: 6000 }),
                 Animated.sequence([
                     Animated.parallel([
-                        Animated.timing(this.cloudOpacityValue, { toValue: 1, duration: 1000, easing: Easing.linear }),
-                        Animated.timing(this.cloudTranslationValue, { toValue: this.cloud.intendedPosition, duration: 2500, easing: Easing.circle })
+                        Animated.timing(this.cloudOpacityValue, { toValue: 1, duration: 1500, easing: Easing.linear }),
+                        Animated.timing(this.cloudTranslationValue, { toValue: this.cloud.intendedPosition, duration: 1500, easing: Easing.circle })
                     ]),
                     Animated.parallel([
-                        Animated.timing(this.planetsOpacityValue, { toValue: 1, duration: 1000, easing: Easing.exp }),
+                        Animated.timing(this.planetsOpacityValue, { toValue: 1, duration: 1500, easing: Easing.exp }),
                         Animated.timing(this.planetsTranslationValue, { toValue: this.planets.intendedPosition, duration: 2000, easing: Easing.bounce }),
                     ]),
                     Animated.timing(this.worldTranslationValue, { toValue: this.world.intendedPosition, duration: 2000, easing: Easing.ease }),
                     Animated.sequence([
-                        Animated.timing(this.princeTranslationValue, { toValue: this.prince.intendedPosition, duration: 3000, easing: Easing.exp }),
-                        // Animated.loop(
-                        //     Animated.timing(this.princeTranslationValue,
-                        //         {
-                        //             toValue: { ...this.prince.intendedPosition, y: this.prince.intendedPosition.y + 6 },
-                        //             duration: 5000, easing: Easing.bounce
-                        //         }),
-                        //     { iterations: 6000 }),
+                        Animated.timing(this.princeTranslationValue, { toValue: this.prince.intendedPosition, duration: 3000, easing: Easing.linear }),
+                        Animated.parallel([
+                            Animated.timing(this.princeTranslationOpacityValue, { toValue: 0, duration: 20, easing: Easing.linear }),
+                            Animated.timing(this.princeHoveringOpacityValue, { toValue: 1, duration: 5, easing: Easing.linear }),
+                        ]),
+                        // for some reason loop does not allow me to set an initial state (nor picks up from the previous transformation)
+                        // so I had to introduce another layer, with another prince that is going to be doing the hovering.
+                        Animated.loop(
+                            Animated.sequence([
+                                Animated.timing(this.princeHoveringValue, { toValue: { ...this.prince.intendedPosition, y: this.prince.intendedPosition.y - 10 }, duration: 500 }),
+                                Animated.timing(this.princeHoveringValue, { toValue: this.prince.intendedPosition, duration: 500 }),
+                            ]),
+                            { iterations: 1000 }
+                        ),
                     ]),
                 ])
             ])
