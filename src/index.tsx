@@ -61,15 +61,16 @@ class AppShell extends React.Component<{}, AppShellState> {
     private cloud: Asset;
     private world: Asset;
     private planets: Asset;
+    private prince: Asset;
 
     private introOpacityValue: Animated.Value;
     private flickerOpacityValue: Animated.Value;
     private cloudOpacityValue: Animated.Value;
     private planetsOpacityValue: Animated.Value;
-    private princeOpacityValue: Animated.Value;
     private cloudTranslationValue: Animated.ValueXY;
     private worldTranslationValue: Animated.ValueXY;
     private planetsTranslationValue: Animated.ValueXY;
+    private princeTranslationValue: Animated.ValueXY;
 
     constructor(props: any) {
         super(props);
@@ -77,7 +78,7 @@ class AppShell extends React.Component<{}, AppShellState> {
         const starsOld = new Asset(require("./assets/stars.png"), globalScale, globalScale, { width: 1682 , height: 2480 });
         const flickeringStars = new Asset(require("./assets/stars1.png"), globalScale, globalScale, { width: 1682 , height: 2480 });
         const stars = new Asset(require("./assets/stars2.png"), globalScale, globalScale, { width: 1682 , height: 2480 });
-        const prince = new Asset(require("./assets/travelingPrince.png"), globalScale, globalScale, { width: 1264 , height: 1372 });
+        this.prince = new Asset(require("./assets/travelingPrince.png"), globalScale, globalScale, { width: 1264 , height: 1372 });
         this.cloud = new Asset(require("./assets/sky.png"), .26, .26, { width: 1654 , height: 1260 });
         this.world = new Asset(require("./assets/princeWorld.png"), globalScale, globalScale, { width: 1263 , height: 1100 });
         this.planets = new Asset(require("./assets/planets.png"), globalScale, globalScale, { width: 382 , height: 299 });
@@ -86,9 +87,9 @@ class AppShell extends React.Component<{}, AppShellState> {
         this.canvasStyle = { flex: 1, height: h, width: w, transform: [{ translateY: h - stars.size.height }] };
         this.starsStyle = { height: stars.size.height, width: stars.size.width };
         this.flickeringStarsStyle = { height: flickeringStars.size.height, width: flickeringStars.size.width };
-        this.cloudStyle = { height: this.cloud.size.height, width: this.cloud.size.width, transform: [{ translateX: 0 }, { translateY: stars.size.height - this.cloud.size.height }], };
-        this.planetStyle = { height: this.planets.size.height, width: this.planets.size.width, transform: [{ translateX: w - this.planets.size.width }, { translateY: (h - 150) - this.planets.size.height }], };
-        this.princeStyle = { height: prince.size.height, width: prince.size.width, transform: [{ translateX: 60 }, { translateY: 22 }], };
+        this.cloudStyle = { height: this.cloud.size.height, width: this.cloud.size.width };
+        this.planetStyle = { height: this.planets.size.height, width: this.planets.size.width };
+        this.princeStyle = { height: this.prince.size.height, width: this.prince.size.width };
         this.worldStyle = { height: this.world.size.height, width: this.world.size.width };
 
         this.cloud.initialPosition = { x: 0, y: h };
@@ -100,6 +101,9 @@ class AppShell extends React.Component<{}, AppShellState> {
         this.planets.initialPosition = { x: w, y: (h - 180) - this.planets.size.height };
         this.planets.intendedPosition = { x: w - this.planets.size.width, y: (h - 150) - this.planets.size.height };
 
+        this.prince.initialPosition = { x: w, y: - this.prince.size.height };
+        this.prince.intendedPosition = { x: 60, y: 22 };
+
         this.introOpacityValue = new Animated.Value(1);
         this.flickerOpacityValue = new Animated.Value(1);
         this.cloudTranslationValue = new Animated.ValueXY(this.cloud.initialPosition);
@@ -107,17 +111,16 @@ class AppShell extends React.Component<{}, AppShellState> {
         this.worldTranslationValue = new Animated.ValueXY(this.world.initialPosition);
         this.planetsOpacityValue = new Animated.Value(0);
         this.planetsTranslationValue = new Animated.ValueXY(this.planets.initialPosition);
-        this.princeOpacityValue = new Animated.Value(0);
+        this.princeTranslationValue = new Animated.ValueXY(this.prince.initialPosition);
 
         this.state = {
             // definiting assets
-            starsOld, stars, flickeringStars, planets: this.planets, prince, cloud: this.cloud, world: this.world
+            starsOld, stars, flickeringStars, planets: this.planets, prince: this.prince, cloud: this.cloud, world: this.world
         };
     }
 
     public render() {
         const { stars, flickeringStars, starsOld, planets, cloud, world, prince } = this.state;
-        const princeOpacity = this.princeOpacityValue.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
         const planetsOpacity = this.planetsOpacityValue.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
         const introOpacity = this.introOpacityValue.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
         const flickerOpacity = this.flickerOpacityValue.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, 1, 0] });
@@ -125,6 +128,7 @@ class AppShell extends React.Component<{}, AppShellState> {
         const cloudTransform = this.cloudTranslationValue.getTranslateTransform();
         const worldTransform = this.worldTranslationValue.getTranslateTransform();
         const planetTransform = this.planetsTranslationValue.getTranslateTransform();
+        const princeTransform = this.princeTranslationValue.getTranslateTransform();
 
         return (
             <View style={styles.container}>
@@ -134,7 +138,7 @@ class AppShell extends React.Component<{}, AppShellState> {
                     <Animated.Image source={cloud.asset} style={[styles.customPosition, this.cloudStyle, { opacity: cloudOpacity, transform: cloudTransform }]} />
                     <Animated.Image source={world.asset} style={[styles.customPosition, this.worldStyle, { transform: worldTransform }]} />
                     <Animated.Image source={planets.asset} style={[styles.customPosition, this.planetStyle, { opacity: planetsOpacity, transform: planetTransform }]} />
-                    <Animated.Image source={prince.asset} style={[styles.customPosition, this.princeStyle, { opacity: princeOpacity }]} />
+                    <Animated.Image source={prince.asset} style={[styles.customPosition, this.princeStyle, { transform: princeTransform }]} />
                 </View>
                 <Animated.View style={[styles.introArea, { opacity: introOpacity }]}>
                     <View style={styles.introTextView}>
@@ -152,23 +156,35 @@ class AppShell extends React.Component<{}, AppShellState> {
 
     showMeTheCharacter = () => {
         this.introOpacityValue.setValue(1);
-        this.princeOpacityValue.setValue(0);
         this.cloudOpacityValue.setValue(0);
         this.planetsOpacityValue.setValue(0);
         this.flickerOpacityValue.setValue(0);
 
-        Animated.parallel([
-            Animated.timing(this.introOpacityValue, { toValue: 0, duration: 2000, easing: Easing.linear }),
-            Animated.loop(Animated.timing(this.flickerOpacityValue, { easing: Easing.linear, duration: 5000, toValue: 0 }), { iterations: 6000 }),
-            Animated.sequence([
-                Animated.parallel([
-                    Animated.timing(this.planetsOpacityValue, { toValue: 1, duration: 1000, easing: Easing.exp }),
-                    Animated.timing(this.planetsTranslationValue, { toValue: this.planets.intendedPosition, duration: 2000, easing: Easing.circle }),
-                    Animated.timing(this.cloudOpacityValue, { toValue: 1, duration: 1000, easing: Easing.exp }),
-                    Animated.timing(this.cloudTranslationValue, { toValue: this.cloud.intendedPosition, duration: 2500, easing: Easing.bounce })
-                ]),
-                Animated.timing(this.worldTranslationValue, { toValue: this.world.intendedPosition, duration: 3000, easing: Easing.cubic }),
-                Animated.timing(this.princeOpacityValue, { toValue: 1, duration: 1000, easing: Easing.exp }),
+        Animated.sequence([
+            Animated.timing(this.introOpacityValue, { toValue: 0, duration: 1500, easing: Easing.linear }),
+            Animated.parallel([
+                Animated.loop(Animated.timing(this.flickerOpacityValue, { easing: Easing.linear, duration: 5000, toValue: 0 }), { iterations: 6000 }),
+                Animated.sequence([
+                    Animated.parallel([
+                        Animated.timing(this.cloudOpacityValue, { toValue: 1, duration: 1000, easing: Easing.linear }),
+                        Animated.timing(this.cloudTranslationValue, { toValue: this.cloud.intendedPosition, duration: 2500, easing: Easing.circle })
+                    ]),
+                    Animated.parallel([
+                        Animated.timing(this.planetsOpacityValue, { toValue: 1, duration: 1000, easing: Easing.exp }),
+                        Animated.timing(this.planetsTranslationValue, { toValue: this.planets.intendedPosition, duration: 2000, easing: Easing.bounce }),
+                    ]),
+                    Animated.timing(this.worldTranslationValue, { toValue: this.world.intendedPosition, duration: 2000, easing: Easing.ease }),
+                    Animated.sequence([
+                        Animated.timing(this.princeTranslationValue, { toValue: this.prince.intendedPosition, duration: 3000, easing: Easing.exp }),
+                        // Animated.loop(
+                        //     Animated.timing(this.princeTranslationValue,
+                        //         {
+                        //             toValue: { ...this.prince.intendedPosition, y: this.prince.intendedPosition.y + 6 },
+                        //             duration: 5000, easing: Easing.bounce
+                        //         }),
+                        //     { iterations: 6000 }),
+                    ]),
+                ])
             ])
         ]).start();
     };
