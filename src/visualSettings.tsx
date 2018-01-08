@@ -30,7 +30,7 @@ export const assets = {
         "He met several grown-ups on his journey...",
         "'Grown-ups are very very odd!' he said...",
         "After a while...\nHe wanted to go back but was unable to...",
-        "So he asked for help of a snake \n\n'Release me from my body so I can go with my rose.'",
+        "So he asked for help of a snake \n\n'Release me from my body so I can go to my rose.'",
         "He said farewell to me and soundlessly the snake fulfilled his wish.",
         "I always look up at the stars, remembering his lovable laughter."
     ],
