@@ -118,7 +118,7 @@ class AppShell extends React.Component<{}, AppShellState> {
                 <Animated.View style={[styles.introArea, { opacity: introOpacity }]}>
                     <View style={styles.introTextView}>
                         <Text style={styles.introTitle}>
-                            Do you know{"\n"}who is{"\n"}Le Petit Prince??
+                            Would you like to know about{"\n"}Le Petit Prince??
                         </Text>
                     </View>
                     <View style={styles.containerWithCentredItems}>
