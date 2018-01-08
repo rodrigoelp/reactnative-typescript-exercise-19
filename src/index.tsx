@@ -6,8 +6,6 @@ import { AppColors, appFontFamily, assets } from "./visualSettings";
 
 const window = Dimensions.get("window");
 const designSize = { width: 1682 , height: 2480 }; // this was the canvas size of the image
-const scaleX = window.width / designSize.width;
-const scaleY = window.height / designSize.height;
 
 interface AssetStyles {
     canvas: ViewStyle, stars: ViewStyle, tinkleStars: ViewStyle, cloud: ViewStyle, planet: ViewStyle, world: ViewStyle, prince: ViewStyle
