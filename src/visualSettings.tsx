@@ -20,4 +20,18 @@ export const assets = {
     cloud: new Asset(require("./assets/sky.png"), .26, .26, { width: 1654 , height: 1260 }),
     world: new Asset(require("./assets/princeWorld.png"), globalScale, globalScale, { width: 1263 , height: 1100 }),
     planets: new Asset(require("./assets/planets.png"), globalScale, globalScale, { width: 382 , height: 299 }),
+    messages: [
+        "This is the story of a little space child",
+        "That became my acquaintance... \n\nMy friend.",
+        "Little did I know... \nHe was hitchhiking shooting stars...\nGoing from planet to planet",
+        "His planet had a rose which he loved very much...",
+        "But left behind looking for a way to stop baobab trees",
+        "Those were destroying his planet and irritating the rose.",
+        "He met several grown-ups on his journey...",
+        "'Grown-ups are very very odd!' he said...",
+        "After a while...\nHe wanted to go back but was unable to...",
+        "So he asked for help of a snake \n\n'Release me from my body so I can go with my rose.'",
+        "He said farewell to me and soundlessly the snake fulfilled his wish.",
+        "I always look up at the stars, remembering his lovable laughter."
+    ],
 };

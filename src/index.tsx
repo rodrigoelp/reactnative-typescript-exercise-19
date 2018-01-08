@@ -8,10 +8,22 @@ const window = Dimensions.get("window");
 const designSize = { width: 1682 , height: 2480 }; // this was the canvas size of the image
 
 interface AssetStyles {
-    canvas: ViewStyle, stars: ViewStyle, tinkleStars: ViewStyle, cloud: ViewStyle, planet: ViewStyle, world: ViewStyle, prince: ViewStyle
+    drawingArea: ViewStyle,
+    storyArea: ViewStyle,
+    messageArea: ViewStyle,
+    stars: ViewStyle,
+    tinkleStars: ViewStyle,
+    cloud: ViewStyle,
+    planet: ViewStyle,
+    world: ViewStyle,
+    prince: ViewStyle
 }
 
-class AppShell extends React.Component {
+interface AppShellState {
+    message: string;
+}
+
+class AppShell extends React.Component<{}, AppShellState> {
     // properties dealing with the styles
     private assetStyles: AssetStyles;
 
@@ -26,9 +38,12 @@ class AppShell extends React.Component {
     private princeTranslationOpacityValue: Animated.Value;
     private princeHoveringValue: Animated.ValueXY;
     private princeHoveringOpacityValue: Animated.Value;
+    private messageOpacityValue: Animated.Value;
+    private messageValue: Animated.Value;
 
     constructor(props: any) {
         super(props);
+        this.state = { message: assets.messages[0] };
 
         const h = window.height, w = window.width;
         this.assetStyles = this.initialiseStyles(h, w);
@@ -45,6 +60,15 @@ class AppShell extends React.Component {
         this.princeTranslationOpacityValue = new Animated.Value(1);
         this.princeHoveringValue = new Animated.ValueXY(assets.prince.intendedPosition);
         this.princeHoveringOpacityValue = new Animated.Value(0);
+
+        this.messageOpacityValue = new Animated.Value(0);
+        this.messageValue = new Animated.Value(0);
+        this.messageValue.addListener(({ value }) => {
+            if (Number.isInteger(value) && value < assets.messages.length) {
+                const message = assets.messages[value];
+                this.setState({ ...this.state, message: message });
+            }
+        });
     }
 
     public render() {
@@ -61,17 +85,31 @@ class AppShell extends React.Component {
         const landingPrinceOpacity = this.princeTranslationOpacityValue.interpolate(opacityConfig)
         const hoveringPrinceTransform = this.princeHoveringValue.getTranslateTransform();
         const hoveringPrinceOpacity = this.princeHoveringOpacityValue.interpolate(opacityConfig);
+        const messageOpacity = this.messageOpacityValue.interpolate(opacityConfig);
 
         return (
             <View style={styles.container}>
-                <View style={this.assetStyles.canvas}>
-                    <Image source={stars.asset} style={[styles.customPosition, this.assetStyles.stars]} />
-                    <Animated.Image source={flickeringStars.asset} style={[styles.customPosition, this.assetStyles.tinkleStars, { opacity: flickerOpacity }]} />
-                    <Animated.Image source={cloud.asset} style={[styles.customPosition, this.assetStyles.cloud, { opacity: cloudOpacity, transform: cloudTransform }]} />
-                    <Animated.Image source={planets.asset} style={[styles.customPosition, this.assetStyles.planet, { opacity: planetsOpacity, transform: planetTransform }]} />
-                    <Animated.Image source={world.asset} style={[styles.customPosition, this.assetStyles.world, { transform: worldTransform }]} />
-                    <Animated.Image source={prince.asset} style={[styles.customPosition, this.assetStyles.prince, { transform: landingPrinceTransform, opacity: landingPrinceOpacity }]} />
-                    <Animated.Image source={prince.asset} style={[styles.customPosition, this.assetStyles.prince, { transform: hoveringPrinceTransform, opacity: hoveringPrinceOpacity }]} />
+                <View style={this.assetStyles.storyArea}>
+                    <View style={[this.assetStyles.drawingArea, styles.customPosition]}>
+                        <Image source={stars.asset} style={[styles.customPosition, this.assetStyles.stars]} />
+                        <Animated.Image source={flickeringStars.asset} style={[styles.customPosition, this.assetStyles.tinkleStars, { opacity: flickerOpacity }]} />
+                        <Animated.Image source={cloud.asset} style={[styles.customPosition, this.assetStyles.cloud, { opacity: cloudOpacity, transform: cloudTransform }]} />
+                        <Animated.Image source={planets.asset} style={[styles.customPosition, this.assetStyles.planet, { opacity: planetsOpacity, transform: planetTransform }]} />
+                        <Animated.Image source={world.asset} style={[styles.customPosition, this.assetStyles.world, { transform: worldTransform }]} />
+                        <Animated.Image source={prince.asset} style={[styles.customPosition, this.assetStyles.prince, { transform: landingPrinceTransform, opacity: landingPrinceOpacity }]} />
+                        <Animated.Image source={prince.asset} style={[styles.customPosition, this.assetStyles.prince, { transform: hoveringPrinceTransform, opacity: hoveringPrinceOpacity }]} />
+                    </View>
+                    <Animated.View style={[this.assetStyles.messageArea, styles.customPosition, { opacity: messageOpacity }]}>
+                        <View style={{
+                            flex: 1, backgroundColor: "#7080a0", borderRadius: 8, shadowColor: "black",
+                            shadowRadius: 10, shadowOpacity: 0.5, margin: 22, padding: 8,
+                            alignItems: "center", justifyContent: "center",
+                        }}>
+                            <Text style={{ color: "white", fontSize: 20, fontWeight: "200", textAlign: "center" }}>
+                                {this.state.message}
+                            </Text>
+                        </View>
+                    </Animated.View>
                 </View>
                 <Animated.View style={[styles.introArea, { opacity: introOpacity }]}>
                     <View style={styles.introTextView}>
@@ -80,7 +118,7 @@ class AppShell extends React.Component {
                         </Text>
                     </View>
                     <View style={styles.containerWithCentredItems}>
-                        <Button title="Sure, why not" backgroundColor="#8ad2c4" borderRadius={8} iconRight={{ name: "question", type: "font-awesome" }} large={true} onPress={this.showMeTheCharacter} />
+                        <Button title="Sure, why not" backgroundColor="#91dae5" borderRadius={8} iconRight={{ name: "question", type: "font-awesome" }} large={true} onPress={this.showMeTheCharacter} />
                     </View>
                 </Animated.View>
             </View>
@@ -103,18 +141,28 @@ class AppShell extends React.Component {
                 Animated.loop(Animated.timing(this.flickerOpacityValue, { easing: Easing.linear, duration: 5000, toValue: 0 }), { iterations: 2000 }),
                 // rest of the animation
                 Animated.sequence([
+                    // Let's show the first message
+                    this.animateMessage({ messageId: 0, readingTime: 2500 }),
+                    this.animateMessage({ messageId: 1, readingTime: 2500 }),
+                    this.animateMessage({ messageId: 2, readingTime: 4000 }),
                     // first, let's get the clouds to pop up.
                     Animated.parallel([
                         Animated.timing(this.cloudOpacityValue, { toValue: 1, duration: 1500, easing: Easing.linear }),
-                        Animated.timing(this.cloudTranslationValue, { toValue: assets.cloud.intendedPosition, duration: 1500, easing: Easing.circle })
+                        Animated.timing(this.cloudTranslationValue, { toValue: assets.cloud.intendedPosition, duration: 1500, easing: Easing.circle }),
+                        // Next message
+                        this.animateMessage({ messageId: 3, readingTime: 3000 }),
                     ]),
+                    this.animateMessage({ messageId: 4, readingTime: 4000 }),
                     // the planets from the side would be a good idea as well...
                     Animated.parallel([
+                        this.animateMessage({ messageId: 5, readingTime: 3500 }),
                         Animated.timing(this.planetsOpacityValue, { toValue: 1, duration: 1500, easing: Easing.linear }),
                         Animated.timing(this.planetsTranslationValue, { toValue: assets.planets.intendedPosition, duration: 2000, easing: Easing.bounce }),
                     ]),
+                    this.animateMessage({ messageId: 6, readingTime: 3000 }),
                     // then, we need the planet hosting the rose (his love)
                     Animated.timing(this.worldTranslationValue, { toValue: assets.world.intendedPosition, duration: 4000, easing: Easing.linear }),
+                    this.animateMessage({ messageId: 7, readingTime: 3000 }),
                     // finally, let's get the prince to drop from the sky onto the planet and hover there, looking to
                     // its beautiful rose.
                     Animated.sequence([
@@ -125,22 +173,41 @@ class AppShell extends React.Component {
                         ]),
                         // for some reason loop does not allow me to set an initial state (nor picks up from the previous transformation)
                         // so I had to introduce another layer, with another prince that is going to be doing the hovering.
-                        Animated.loop(
+                        Animated.parallel([
+                            Animated.loop(
+                                Animated.sequence([
+                                    Animated.timing(this.princeHoveringValue, { toValue: { ...assets.prince.intendedPosition, y: assets.prince.intendedPosition.y - 10 }, duration: 500 }),
+                                    Animated.timing(this.princeHoveringValue, { toValue: assets.prince.intendedPosition, duration: 500 }),
+                                ]),
+                                { iterations: 1000 }
+                            ),
                             Animated.sequence([
-                                Animated.timing(this.princeHoveringValue, { toValue: { ...assets.prince.intendedPosition, y: assets.prince.intendedPosition.y - 10 }, duration: 500 }),
-                                Animated.timing(this.princeHoveringValue, { toValue: assets.prince.intendedPosition, duration: 500 }),
-                            ]),
-                            { iterations: 1000 }
-                        ),
+                                this.animateMessage({ messageId: 8, readingTime: 3500 }),
+                                this.animateMessage({ messageId: 9, readingTime: 3500 }),
+                                this.animateMessage({ messageId: 10, readingTime: 4000 }),
+                                this.animateMessage({ messageId: 11, readingTime: 10000, longDismiss: true }),
+                            ])
+                        ])
                     ]),
                 ])
             ])
         ]).start();
     };
 
+    animateMessage = (input: { messageId: number, readingTime: number, longDismiss?: boolean }) => {
+        const longDismissDuration = (input.longDismiss === undefined || input.longDismiss === false) ? 500 : 3000;
+        return Animated.sequence([
+            Animated.timing(this.messageValue, { toValue: input.messageId, duration: 10, delay: 500 }),
+            Animated.timing(this.messageOpacityValue, { toValue: 1, duration: 500 }),
+            Animated.timing(this.messageOpacityValue, { toValue: 0, delay: input.readingTime, duration: longDismissDuration }),
+        ]);
+    }
+
     private initialiseStyles(height: number, width: number): AssetStyles {
         return {
-            canvas: { flex: 1, height, width, transform: [{ translateY: height - assets.stars.size.height }] },
+            storyArea: { flex: 1, height, width },
+            drawingArea: { flex: 1, height, width, transform: [{ translateY: height - assets.stars.size.height }] },
+            messageArea: { flex: 1, height: height / 3, width, backgroundColor: "transparent" },
             stars: { height: assets.stars.size.height, width: assets.stars.size.width },
             tinkleStars: { height: assets.flickeringStars.size.height, width: assets.flickeringStars.size.width },
             cloud: { height: assets.cloud.size.height, width: assets.cloud.size.width },
