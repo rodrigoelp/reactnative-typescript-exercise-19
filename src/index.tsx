@@ -40,6 +40,7 @@ class AppShell extends React.Component<{}, AppShellState> {
     private princeHoveringOpacityValue: Animated.Value;
     private messageOpacityValue: Animated.Value;
     private messageValue: Animated.Value;
+    private messageTranslateValue: Animated.ValueXY;
 
     constructor(props: any) {
         super(props);
@@ -62,11 +63,13 @@ class AppShell extends React.Component<{}, AppShellState> {
         this.princeHoveringOpacityValue = new Animated.Value(0);
 
         this.messageOpacityValue = new Animated.Value(0);
+        this.messageTranslateValue = new Animated.ValueXY({ x: 0, y: 0 });
         this.messageValue = new Animated.Value(0);
         this.messageValue.addListener(({ value }) => {
             if (Number.isInteger(value) && value < assets.messages.length) {
                 const message = assets.messages[value];
                 this.setState({ ...this.state, message: message });
+                this.messageTranslateValue.setValue({ x: 0, y: 0 });
             }
         });
     }
@@ -86,6 +89,7 @@ class AppShell extends React.Component<{}, AppShellState> {
         const hoveringPrinceTransform = this.princeHoveringValue.getTranslateTransform();
         const hoveringPrinceOpacity = this.princeHoveringOpacityValue.interpolate(opacityConfig);
         const messageOpacity = this.messageOpacityValue.interpolate(opacityConfig);
+        const messateTranslate = this.messageTranslateValue.getTranslateTransform();
 
         return (
             <View style={styles.container}>
@@ -99,9 +103,9 @@ class AppShell extends React.Component<{}, AppShellState> {
                         <Animated.Image source={prince.asset} style={[styles.customPosition, this.assetStyles.prince, { transform: landingPrinceTransform, opacity: landingPrinceOpacity }]} />
                         <Animated.Image source={prince.asset} style={[styles.customPosition, this.assetStyles.prince, { transform: hoveringPrinceTransform, opacity: hoveringPrinceOpacity }]} />
                     </View>
-                    <Animated.View style={[this.assetStyles.messageArea, styles.customPosition, { opacity: messageOpacity }]}>
+                    <Animated.View style={[this.assetStyles.messageArea, styles.customPosition, { opacity: messageOpacity, transform: messateTranslate }]}>
                         <View style={{
-                            flex: 1, backgroundColor: "#7080a0", borderRadius: 8, shadowColor: "black",
+                            flex: 1, backgroundColor: "#7080a0", borderRadius: 8, shadowColor: "#91dae5",
                             shadowRadius: 10, shadowOpacity: 0.5, margin: 22, padding: 8,
                             alignItems: "center", justifyContent: "center",
                         }}>
@@ -118,7 +122,7 @@ class AppShell extends React.Component<{}, AppShellState> {
                         </Text>
                     </View>
                     <View style={styles.containerWithCentredItems}>
-                        <Button title="Sure, why not" backgroundColor="#91dae5" borderRadius={8} iconRight={{ name: "question", type: "font-awesome" }} large={true} onPress={this.showMeTheCharacter} />
+                        <Button title="Sure, why not" backgroundColor="#8ad2c4" borderRadius={8} iconRight={{ name: "question", type: "font-awesome" }} large={true} onPress={this.showMeTheCharacter} />
                     </View>
                 </Animated.View>
             </View>
@@ -198,7 +202,10 @@ class AppShell extends React.Component<{}, AppShellState> {
         const longDismissDuration = (input.longDismiss === undefined || input.longDismiss === false) ? 500 : 3000;
         return Animated.sequence([
             Animated.timing(this.messageValue, { toValue: input.messageId, duration: 10, delay: 500 }),
-            Animated.timing(this.messageOpacityValue, { toValue: 1, duration: 500 }),
+            Animated.parallel([
+                Animated.timing(this.messageOpacityValue, { toValue: 1, duration: 500 }),
+                Animated.timing(this.messageTranslateValue, { toValue: { x: 0, y: 20 }, duration: 500, easing: Easing.bounce }),
+            ]),
             Animated.timing(this.messageOpacityValue, { toValue: 0, delay: input.readingTime, duration: longDismissDuration }),
         ]);
     }
