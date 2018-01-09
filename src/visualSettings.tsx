@@ -27,7 +27,7 @@ export const assets = {
         "That became my acquaintance... \n\nMy friend.",
         "Little did I know... \nHe was hitchhiking shooting stars...\nGoing from planet to planet",
         "His planet had a rose which he loved very much...",
-        "But left behind looking for a way to stop baobab trees",
+        "But left it behind looking for a way to stop baobab trees",
         "Those were destroying his planet and irritating the rose.",
         "He met several grown-ups on his journey...",
         "'Grown-ups are very very odd!' he said...",

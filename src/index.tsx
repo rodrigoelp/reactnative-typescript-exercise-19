@@ -207,38 +207,47 @@ class AppShell extends React.Component<{}, AppShellState> {
                 // Starting the animations... I want the stars (some) to tinkle on the background
                 // as the other animation is playing.
                 Animated.parallel([
+                    // Playing all the messages
+                    Animated.sequence([
+                        // the timing of the messages is going to be logically disconnected
+                        // but we can do the math of when things are going to be displayed and code that in (or calculate it)
+                        this.animateMessage({ messageId: 0, readingTime: 2500, delayBeforeStart: 300 }),
+                        this.animateMessage({ messageId: 1, readingTime: 2500, delayBeforeStart: 2000 }),
+                        this.animateMessage({ messageId: 2, readingTime: 4000, delayBeforeStart: 1000 }),
+                        this.animateMessage({ messageId: 3, readingTime: 3000, delayBeforeStart: 4000 }),
+                        this.animateMessage({ messageId: 4, readingTime: 4000, delayBeforeStart: 3000 }),
+                        this.animateMessage({ messageId: 5, readingTime: 3500, delayBeforeStart: 2000 }),
+                        this.animateMessage({ messageId: 6, readingTime: 3000, delayBeforeStart: 4000 }),
+                        this.animateMessage({ messageId: 7, readingTime: 3000, delayBeforeStart: 2000 }),
+                        this.animateMessage({ messageId: 8, readingTime: 3500, delayBeforeStart: 2000 }),
+                        this.animateMessage({ messageId: 9, readingTime: 3500, delayBeforeStart: 2000 }),
+                        this.animateMessage({ messageId: 10, readingTime: 4000, delayBeforeStart: 1000 }),
+                        this.animateMessage({ messageId: 11, readingTime: 6000, delayBeforeStart: 3000, longDismiss: true }),
+                    ]),
                     // tinkling stars
                     Animated.loop(Animated.timing(this.flicker1OpacityValue, { toValue: 1, duration: 5000, easing: Easing.linear }), { iterations: 2000 }),
-                    Animated.loop(Animated.timing(this.flicker2OpacityValue, { toValue: 1, duration: 7000, easing: Easing.linear, delay: 300 }), { iterations: 2000 }),
-                    Animated.loop(Animated.timing(this.flicker3OpacityValue, { toValue: 1, duration: 11000, easing: Easing.linear, delay: 1500 }), { iterations: 1000 }),
+                    Animated.loop(Animated.timing(this.flicker2OpacityValue, { toValue: 1, duration: 7000, easing: Easing.linear, delay: 1500 }), { iterations: 2000 }),
+                    Animated.loop(Animated.timing(this.flicker3OpacityValue, { toValue: 1, duration: 11000, easing: Easing.linear, delay: 5000 }), { iterations: 1000 }),
                     // rest of the animation
                     Animated.sequence([
                         // Let's show the first message
-                        this.animateMessage({ messageId: 0, readingTime: 2500 }),
-                        this.animateMessage({ messageId: 1, readingTime: 2500 }),
-                        this.animateMessage({ messageId: 2, readingTime: 4000 }),
                         // first, let's get the clouds to pop up.
                         Animated.parallel([
-                            Animated.timing(this.cloudOpacityValue, { toValue: 1, duration: 1500, easing: Easing.linear }),
+                            Animated.timing(this.cloudOpacityValue, { toValue: 1, duration: 1500, easing: Easing.linear, delay: 8000 }),
                             Animated.timing(this.cloudTranslationValue, { toValue: assets.cloud.intendedPosition, duration: 1500, easing: Easing.circle }),
                             // Next message
-                            this.animateMessage({ messageId: 3, readingTime: 3000 }),
                         ]),
-                        this.animateMessage({ messageId: 4, readingTime: 4000 }),
                         // the planets from the side would be a good idea as well...
                         Animated.parallel([
-                            this.animateMessage({ messageId: 5, readingTime: 3500 }),
-                            Animated.timing(this.planetsOpacityValue, { toValue: 1, duration: 1500, easing: Easing.linear }),
+                            Animated.timing(this.planetsOpacityValue, { toValue: 1, duration: 1500, easing: Easing.linear, delay: 5500 }),
                             Animated.timing(this.planetsTranslationValue, { toValue: assets.planets.intendedPosition, duration: 2000, easing: Easing.bounce }),
                         ]),
-                        this.animateMessage({ messageId: 6, readingTime: 3000 }),
                         // then, we need the planet hosting the rose (his love)
-                        Animated.timing(this.worldTranslationValue, { toValue: assets.world.intendedPosition, duration: 4000, easing: Easing.linear }),
-                        this.animateMessage({ messageId: 7, readingTime: 3000 }),
+                        Animated.timing(this.worldTranslationValue, { toValue: assets.world.intendedPosition, duration: 4000, easing: Easing.linear, delay: 5000 }),
                         // finally, let's get the prince to drop from the sky onto the planet and hover there, looking to
                         // its beautiful rose.
                         Animated.sequence([
-                            Animated.timing(this.princeTranslationValue, { toValue: assets.prince.intendedPosition, duration: 3000, easing: Easing.linear }),
+                            Animated.timing(this.princeTranslationValue, { toValue: assets.prince.intendedPosition, duration: 3000, easing: Easing.linear, delay: 7000 }),
                             Animated.parallel([
                                 Animated.timing(this.princeTranslationOpacityValue, { toValue: 0, duration: 20, easing: Easing.linear }),
                                 Animated.timing(this.princeHoveringOpacityValue, { toValue: 1, duration: 5, easing: Easing.linear }),
@@ -254,13 +263,7 @@ class AppShell extends React.Component<{}, AppShellState> {
                                     { iterations: 1000 }
                                 ),
                                 Animated.sequence([
-                                    this.animateMessage({ messageId: 8, readingTime: 3500 }),
-                                    this.animateMessage({ messageId: 9, readingTime: 3500 }),
-                                    this.animateMessage({ messageId: 10, readingTime: 4000 }),
-                                    this.animateMessage({ messageId: 11, readingTime: 6000, longDismiss: true }),
-                                ]),
-                                Animated.sequence([
-                                    Animated.timing(this.finalAreaTranslateValue, { toValue: { x: 0, y: 0 } }),
+                                    Animated.timing(this.finalAreaTranslateValue, { toValue: { x: 0, y: 0 }, delay: 18000 }),
                                     Animated.timing(this.finalAreaOpacityValue, { toValue: 1, duration: 2000, delay: 21000 }),
                                 ]),
                             ]),
@@ -271,10 +274,11 @@ class AppShell extends React.Component<{}, AppShellState> {
         this.ongoingAnimation.start();
     };
 
-    animateMessage = (input: { messageId: number, readingTime: number, longDismiss?: boolean }) => {
+    animateMessage = (input: { messageId: number, readingTime: number, delayBeforeStart?: number, longDismiss?: boolean }) => {
         const longDismissDuration = (input.longDismiss === undefined || input.longDismiss === false) ? 500 : 3000;
+        const initialDelay = (input.delayBeforeStart === undefined) ? 0 : input.delayBeforeStart;
         return Animated.sequence([
-            Animated.timing(this.messageValue, { toValue: input.messageId, duration: 10, delay: 500 }),
+            Animated.timing(this.messageValue, { toValue: input.messageId, duration: 10, delay: initialDelay }),
             Animated.parallel([
                 Animated.timing(this.messageOpacityValue, { toValue: 1, duration: 500 }),
                 Animated.timing(this.messageTranslateValue, { toValue: { x: 0, y: 20 }, duration: 500, easing: Easing.bounce }),
