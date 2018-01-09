@@ -30,7 +30,9 @@ class AppShell extends React.Component<{}, AppShellState> {
 
     private introOpacityValue: Animated.Value;
     private introAreaTranslateValue: Animated.ValueXY;
-    private flickerOpacityValue: Animated.Value;
+    private flicker1OpacityValue: Animated.Value;
+    private flicker2OpacityValue: Animated.Value;
+    private flicker3OpacityValue: Animated.Value;
     private cloudOpacityValue: Animated.Value;
     private planetsOpacityValue: Animated.Value;
     private cloudTranslationValue: Animated.ValueXY;
@@ -58,7 +60,9 @@ class AppShell extends React.Component<{}, AppShellState> {
 
         this.introOpacityValue = new Animated.Value(1);
         this.introAreaTranslateValue = new Animated.ValueXY({ x: 0, y: 0 });
-        this.flickerOpacityValue = new Animated.Value(1);
+        this.flicker1OpacityValue = new Animated.Value(0);
+        this.flicker2OpacityValue = new Animated.Value(0);
+        this.flicker3OpacityValue = new Animated.Value(0);
         this.cloudTranslationValue = new Animated.ValueXY(assets.cloud.initialPosition);
         this.cloudOpacityValue = new Animated.Value(0);
         this.worldTranslationValue = new Animated.ValueXY(assets.world.initialPosition);
@@ -87,12 +91,14 @@ class AppShell extends React.Component<{}, AppShellState> {
     }
 
     public render() {
-        const { stars, flickeringStars, starsOld, planets, cloud, world, prince } = assets;
+        const { fixedStars, flickeringStars1, flickeringStars2, flickeringStars3, starsOld, planets, cloud, world, prince } = assets;
         const opacityConfig: Animated.InterpolationConfigType = { inputRange: [0, 1], outputRange: [0, 1] };
         const introOpacity = this.introOpacityValue.interpolate(opacityConfig);
         const introTranslate = this.introAreaTranslateValue.getTranslateTransform();
         const planetsOpacity = this.planetsOpacityValue.interpolate(opacityConfig);
-        const flickerOpacity = this.flickerOpacityValue.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, 1, 0] });
+        const flicker1Opacity = this.flicker1OpacityValue.interpolate({ inputRange: [0, .5, 1], outputRange: [0, 1, 0] });
+        const flicker2Opacity = this.flicker2OpacityValue.interpolate({ inputRange: [0, .2, .7, .9, 1], outputRange: [0, 1, 0, 1, 0] });
+        const flicker3Opacity = this.flicker3OpacityValue.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, 1, 0] });
         const cloudOpacity = this.cloudOpacityValue.interpolate(opacityConfig);
         const cloudTransform = this.cloudTranslationValue.getTranslateTransform();
         const worldTransform = this.worldTranslationValue.getTranslateTransform();
@@ -113,8 +119,10 @@ class AppShell extends React.Component<{}, AppShellState> {
             <View style={styles.container}>
                 <View style={this.assetStyles.storyArea}>
                     <View style={[this.assetStyles.drawingArea, styles.customPosition]}>
-                        <Image source={stars.asset} style={[styles.customPosition, this.assetStyles.stars]} />
-                        <Animated.Image source={flickeringStars.asset} style={[styles.customPosition, this.assetStyles.tinkleStars, { opacity: flickerOpacity }]} />
+                        <Image source={fixedStars.asset} style={[styles.customPosition, this.assetStyles.stars]} />
+                        <Animated.Image source={flickeringStars1.asset} style={[styles.customPosition, this.assetStyles.tinkleStars, { opacity: flicker1Opacity }]} />
+                        <Animated.Image source={flickeringStars2.asset} style={[styles.customPosition, this.assetStyles.tinkleStars, { opacity: flicker2Opacity }]} />
+                        <Animated.Image source={flickeringStars3.asset} style={[styles.customPosition, this.assetStyles.tinkleStars, { opacity: flicker3Opacity }]} />
                         <Animated.Image source={cloud.asset} style={[styles.customPosition, this.assetStyles.cloud, { opacity: cloudOpacity, transform: cloudTransform }]} />
                         <Animated.Image source={planets.asset} style={[styles.customPosition, this.assetStyles.planet, { opacity: planetsOpacity, transform: planetTransform }]} />
                         <Animated.Image source={world.asset} style={[styles.customPosition, this.assetStyles.world, { transform: worldTransform }]} />
@@ -165,7 +173,9 @@ class AppShell extends React.Component<{}, AppShellState> {
         this.worldTranslationValue.setValue(assets.world.initialPosition);
         this.princeTranslationValue.setValue(assets.prince.initialPosition);
         this.princeHoveringValue.setValue(assets.prince.intendedPosition);
-        this.flickerOpacityValue.setValue(0);
+        this.flicker1OpacityValue.setValue(0);
+        this.flicker2OpacityValue.setValue(0);
+        this.flicker3OpacityValue.setValue(0);
         this.cloudOpacityValue.setValue(0);
         this.planetsOpacityValue.setValue(0);
         this.princeTranslationOpacityValue.setValue(1);
@@ -178,11 +188,6 @@ class AppShell extends React.Component<{}, AppShellState> {
     }
 
     playStory = () => {
-        this.introOpacityValue.setValue(1);
-        this.cloudOpacityValue.setValue(0);
-        this.planetsOpacityValue.setValue(0);
-        this.flickerOpacityValue.setValue(0);
-
         // So... What do I have planned for the animation?
         // First, get rid of the initial panel asking the question.
         //   This changes the opacity and moves it out of the way so the user can not click on it any more.
@@ -203,7 +208,9 @@ class AppShell extends React.Component<{}, AppShellState> {
                 // as the other animation is playing.
                 Animated.parallel([
                     // tinkling stars
-                    Animated.loop(Animated.timing(this.flickerOpacityValue, { easing: Easing.linear, duration: 5000, toValue: 0 }), { iterations: 2000 }),
+                    Animated.loop(Animated.timing(this.flicker1OpacityValue, { toValue: 1, duration: 5000, easing: Easing.linear }), { iterations: 2000 }),
+                    Animated.loop(Animated.timing(this.flicker2OpacityValue, { toValue: 1, duration: 7000, easing: Easing.linear, delay: 300 }), { iterations: 2000 }),
+                    Animated.loop(Animated.timing(this.flicker3OpacityValue, { toValue: 1, duration: 11000, easing: Easing.linear, delay: 1500 }), { iterations: 1000 }),
                     // rest of the animation
                     Animated.sequence([
                         // Let's show the first message
@@ -279,11 +286,11 @@ class AppShell extends React.Component<{}, AppShellState> {
     private initialiseStyles(height: number, width: number): AssetStyles {
         return {
             storyArea: { flex: 1, height, width },
-            drawingArea: { flex: 1, height, width, transform: [{ translateY: height - assets.stars.size.height }] },
+            drawingArea: { flex: 1, height, width, transform: [{ translateY: height - assets.fixedStars.size.height }] },
             messageArea: { flex: 1, height: height / 3, width, backgroundColor: "transparent" },
             finalArea: { flex: 1, height: height, width, backgroundColor: "transparent" },
-            stars: { height: assets.stars.size.height, width: assets.stars.size.width },
-            tinkleStars: { height: assets.flickeringStars.size.height, width: assets.flickeringStars.size.width },
+            stars: { height: assets.fixedStars.size.height, width: assets.fixedStars.size.width },
+            tinkleStars: { height: assets.fixedStars.size.height, width: assets.fixedStars.size.width },
             cloud: { height: assets.cloud.size.height, width: assets.cloud.size.width },
             planet: { height: assets.planets.size.height, width: assets.planets.size.width },
             world: { height: assets.world.size.height, width: assets.world.size.width },
@@ -295,9 +302,9 @@ class AppShell extends React.Component<{}, AppShellState> {
         // some of these magic numbers are based on the size of the images and where I want it to be presented.
         // Ideally, I should calculate it from elements on the screen.
         assets.cloud.initialPosition = { x: 0, y: height };
-        assets.cloud.intendedPosition = { x: 0, y: assets.stars.size.height - assets.cloud.size.height };
+        assets.cloud.intendedPosition = { x: 0, y: assets.fixedStars.size.height - assets.cloud.size.height };
         assets.world.initialPosition = { x: -assets.world.size.width / 2, y: height };
-        assets.world.intendedPosition = { x: 0, y: assets.stars.size.height - assets.world.size.height };
+        assets.world.intendedPosition = { x: 0, y: assets.fixedStars.size.height - assets.world.size.height };
         assets.planets.initialPosition = { x: width, y: (height - 180) - assets.planets.size.height };
         assets.planets.intendedPosition = { x: width - assets.planets.size.width, y: (height - 150) - assets.planets.size.height };
         assets.prince.initialPosition = { x: width, y: - assets.prince.size.height };
