@@ -1,6 +1,6 @@
 import * as React from "react";
 import { AppRegistry, View, Dimensions, Image, ScaledSize, Animated, Text, Platform, ViewStyle, Easing, StyleSheet } from "react-native";
-import { Button } from "react-native-elements";
+import { Button, Avatar } from "react-native-elements";
 import { AssetSize, Asset, Point } from "./models";
 import { AppColors, appFontFamily, assets } from "./visualSettings";
 
@@ -11,6 +11,7 @@ interface AssetStyles {
     drawingArea: ViewStyle,
     storyArea: ViewStyle,
     messageArea: ViewStyle,
+    finalArea: ViewStyle,
     stars: ViewStyle,
     tinkleStars: ViewStyle,
     cloud: ViewStyle,
@@ -28,6 +29,7 @@ class AppShell extends React.Component<{}, AppShellState> {
     private assetStyles: AssetStyles;
 
     private introOpacityValue: Animated.Value;
+    private introAreaTranslateValue: Animated.ValueXY;
     private flickerOpacityValue: Animated.Value;
     private cloudOpacityValue: Animated.Value;
     private planetsOpacityValue: Animated.Value;
@@ -41,6 +43,10 @@ class AppShell extends React.Component<{}, AppShellState> {
     private messageOpacityValue: Animated.Value;
     private messageValue: Animated.Value;
     private messageTranslateValue: Animated.ValueXY;
+    private finalAreaOpacityValue: Animated.Value;
+    private finalAreaTranslateValue: Animated.ValueXY;
+
+    private ongoingAnimation?: Animated.CompositeAnimation;
 
     constructor(props: any) {
         super(props);
@@ -51,6 +57,7 @@ class AppShell extends React.Component<{}, AppShellState> {
         this.initialiseAssetsPosition(h, w);
 
         this.introOpacityValue = new Animated.Value(1);
+        this.introAreaTranslateValue = new Animated.ValueXY({ x: 0, y: 0 });
         this.flickerOpacityValue = new Animated.Value(1);
         this.cloudTranslationValue = new Animated.ValueXY(assets.cloud.initialPosition);
         this.cloudOpacityValue = new Animated.Value(0);
@@ -72,13 +79,19 @@ class AppShell extends React.Component<{}, AppShellState> {
                 this.messageTranslateValue.setValue({ x: 0, y: 0 });
             }
         });
+
+        this.finalAreaOpacityValue = new Animated.Value(0);
+        this.finalAreaTranslateValue = new Animated.ValueXY({ x: w, y: 0 });
+
+        this.ongoingAnimation = undefined;
     }
 
     public render() {
         const { stars, flickeringStars, starsOld, planets, cloud, world, prince } = assets;
         const opacityConfig: Animated.InterpolationConfigType = { inputRange: [0, 1], outputRange: [0, 1] };
-        const planetsOpacity = this.planetsOpacityValue.interpolate(opacityConfig);
         const introOpacity = this.introOpacityValue.interpolate(opacityConfig);
+        const introTranslate = this.introAreaTranslateValue.getTranslateTransform();
+        const planetsOpacity = this.planetsOpacityValue.interpolate(opacityConfig);
         const flickerOpacity = this.flickerOpacityValue.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, 1, 0] });
         const cloudOpacity = this.cloudOpacityValue.interpolate(opacityConfig);
         const cloudTransform = this.cloudTranslationValue.getTranslateTransform();
@@ -90,6 +103,11 @@ class AppShell extends React.Component<{}, AppShellState> {
         const hoveringPrinceOpacity = this.princeHoveringOpacityValue.interpolate(opacityConfig);
         const messageOpacity = this.messageOpacityValue.interpolate(opacityConfig);
         const messateTranslate = this.messageTranslateValue.getTranslateTransform();
+        const finalAreaTranslate = this.finalAreaTranslateValue.getTranslateTransform();
+        const finalAreaOpacity = this.finalAreaOpacityValue.interpolate({
+            inputRange: [0, .15, .3, .45, .60, .75, .90, 1],
+            outputRange: [0, 1, 0, 1, 0, 1, 0, 1] // the intension is to make it pulse without having to write that as an animation.
+        });
 
         return (
             <View style={styles.container}>
@@ -114,88 +132,136 @@ class AppShell extends React.Component<{}, AppShellState> {
                             </Text>
                         </View>
                     </Animated.View>
+                    <Animated.View style={[this.assetStyles.finalArea, styles.customPosition, { opacity: finalAreaOpacity, transform: finalAreaTranslate }]}>
+                        <View style={{ flex: 1, alignItems: "center", justifyContent: "flex-end", padding: 16 }}>
+                            <Avatar onPress={this.restart} icon={{ name: "reload", type: "simple-line-icon" }}
+                                rounded={true} large={true}
+                                overlayContainerStyle={{ backgroundColor: "#8ad2c4", shadowColor: "black", shadowRadius: 8, shadowOpacity: 0.3 }} />
+                        </View>
+                    </Animated.View>
                 </View>
-                <Animated.View style={[styles.introArea, { opacity: introOpacity }]}>
+                <Animated.View style={[styles.introArea, { opacity: introOpacity, transform: introTranslate }]}>
                     <View style={styles.introTextView}>
                         <Text style={styles.introTitle}>
                             Would you like to know about{"\n"}Le Petit Prince??
                         </Text>
                     </View>
                     <View style={styles.containerWithCentredItems}>
-                        <Button title="Sure, why not" backgroundColor="#8ad2c4" borderRadius={8} iconRight={{ name: "question", type: "font-awesome" }} large={true} onPress={this.showMeTheCharacter} />
+                        <Button title="Sure, why not" backgroundColor="#8ad2c4" borderRadius={8} iconRight={{ name: "question", type: "font-awesome" }} large={true} onPress={this.playStory} />
                     </View>
                 </Animated.View>
             </View>
         );
     }
 
-    showMeTheCharacter = () => {
+    restart = () => {
+        if (this.ongoingAnimation) {
+            this.ongoingAnimation.stop();
+            this.ongoingAnimation = undefined;
+        }
+
+        this.cloudTranslationValue.setValue(assets.cloud.initialPosition);
+        this.planetsTranslationValue.setValue(assets.planets.initialPosition);
+        this.worldTranslationValue.setValue(assets.world.initialPosition);
+        this.princeTranslationValue.setValue(assets.prince.initialPosition);
+        this.princeHoveringValue.setValue(assets.prince.intendedPosition);
+        this.flickerOpacityValue.setValue(0);
+        this.cloudOpacityValue.setValue(0);
+        this.planetsOpacityValue.setValue(0);
+        this.princeTranslationOpacityValue.setValue(1);
+        this.princeHoveringOpacityValue.setValue(0);
+
+        this.introAreaTranslateValue.setValue({ x: 0, y: 0 });
+        this.introOpacityValue.setValue(1);
+        this.finalAreaTranslateValue.setValue({ x: window.width, y: 0 });
+        this.finalAreaOpacityValue.setValue(0);
+    }
+
+    playStory = () => {
         this.introOpacityValue.setValue(1);
         this.cloudOpacityValue.setValue(0);
         this.planetsOpacityValue.setValue(0);
         this.flickerOpacityValue.setValue(0);
 
-        Animated.sequence([
-            // fading out the landing view.
-            Animated.timing(this.introOpacityValue, { toValue: 0, duration: 750, easing: Easing.linear }),
-            // Starting the animations... I want the stars (some) to tinkle on the background
-            // as the other animation is playing.
-            Animated.parallel([
-                // tinkling stars
-                Animated.loop(Animated.timing(this.flickerOpacityValue, { easing: Easing.linear, duration: 5000, toValue: 0 }), { iterations: 2000 }),
-                // rest of the animation
+        // So... What do I have planned for the animation?
+        // First, get rid of the initial panel asking the question.
+        //   This changes the opacity and moves it out of the way so the user can not click on it any more.
+        // Then I want the stars to start flickering, messages start to pour on the screen
+        // and the planets and clouds to pop from the side or the bottom.
+        // At the very end, I want a panel to pop showing the restart button so the user is not stuck
+        // there.
+
+        this.ongoingAnimation =
+            Animated.sequence([
                 Animated.sequence([
-                    // Let's show the first message
-                    this.animateMessage({ messageId: 0, readingTime: 2500 }),
-                    this.animateMessage({ messageId: 1, readingTime: 2500 }),
-                    this.animateMessage({ messageId: 2, readingTime: 4000 }),
-                    // first, let's get the clouds to pop up.
-                    Animated.parallel([
-                        Animated.timing(this.cloudOpacityValue, { toValue: 1, duration: 1500, easing: Easing.linear }),
-                        Animated.timing(this.cloudTranslationValue, { toValue: assets.cloud.intendedPosition, duration: 1500, easing: Easing.circle }),
-                        // Next message
-                        this.animateMessage({ messageId: 3, readingTime: 3000 }),
-                    ]),
-                    this.animateMessage({ messageId: 4, readingTime: 4000 }),
-                    // the planets from the side would be a good idea as well...
-                    Animated.parallel([
-                        this.animateMessage({ messageId: 5, readingTime: 3500 }),
-                        Animated.timing(this.planetsOpacityValue, { toValue: 1, duration: 1500, easing: Easing.linear }),
-                        Animated.timing(this.planetsTranslationValue, { toValue: assets.planets.intendedPosition, duration: 2000, easing: Easing.bounce }),
-                    ]),
-                    this.animateMessage({ messageId: 6, readingTime: 3000 }),
-                    // then, we need the planet hosting the rose (his love)
-                    Animated.timing(this.worldTranslationValue, { toValue: assets.world.intendedPosition, duration: 4000, easing: Easing.linear }),
-                    this.animateMessage({ messageId: 7, readingTime: 3000 }),
-                    // finally, let's get the prince to drop from the sky onto the planet and hover there, looking to
-                    // its beautiful rose.
+                    // fading out the landing view.
+                    Animated.timing(this.introOpacityValue, { toValue: 0, duration: 750, easing: Easing.linear }),
+                    // moving it out of the way
+                    Animated.timing(this.introAreaTranslateValue, { toValue: { x: window.width, y: 0 } })
+                ]),
+                // Starting the animations... I want the stars (some) to tinkle on the background
+                // as the other animation is playing.
+                Animated.parallel([
+                    // tinkling stars
+                    Animated.loop(Animated.timing(this.flickerOpacityValue, { easing: Easing.linear, duration: 5000, toValue: 0 }), { iterations: 2000 }),
+                    // rest of the animation
                     Animated.sequence([
-                        Animated.timing(this.princeTranslationValue, { toValue: assets.prince.intendedPosition, duration: 3000, easing: Easing.linear }),
+                        // Let's show the first message
+                        this.animateMessage({ messageId: 0, readingTime: 2500 }),
+                        this.animateMessage({ messageId: 1, readingTime: 2500 }),
+                        this.animateMessage({ messageId: 2, readingTime: 4000 }),
+                        // first, let's get the clouds to pop up.
                         Animated.parallel([
-                            Animated.timing(this.princeTranslationOpacityValue, { toValue: 0, duration: 20, easing: Easing.linear }),
-                            Animated.timing(this.princeHoveringOpacityValue, { toValue: 1, duration: 5, easing: Easing.linear }),
+                            Animated.timing(this.cloudOpacityValue, { toValue: 1, duration: 1500, easing: Easing.linear }),
+                            Animated.timing(this.cloudTranslationValue, { toValue: assets.cloud.intendedPosition, duration: 1500, easing: Easing.circle }),
+                            // Next message
+                            this.animateMessage({ messageId: 3, readingTime: 3000 }),
                         ]),
-                        // for some reason loop does not allow me to set an initial state (nor picks up from the previous transformation)
-                        // so I had to introduce another layer, with another prince that is going to be doing the hovering.
+                        this.animateMessage({ messageId: 4, readingTime: 4000 }),
+                        // the planets from the side would be a good idea as well...
                         Animated.parallel([
-                            Animated.loop(
+                            this.animateMessage({ messageId: 5, readingTime: 3500 }),
+                            Animated.timing(this.planetsOpacityValue, { toValue: 1, duration: 1500, easing: Easing.linear }),
+                            Animated.timing(this.planetsTranslationValue, { toValue: assets.planets.intendedPosition, duration: 2000, easing: Easing.bounce }),
+                        ]),
+                        this.animateMessage({ messageId: 6, readingTime: 3000 }),
+                        // then, we need the planet hosting the rose (his love)
+                        Animated.timing(this.worldTranslationValue, { toValue: assets.world.intendedPosition, duration: 4000, easing: Easing.linear }),
+                        this.animateMessage({ messageId: 7, readingTime: 3000 }),
+                        // finally, let's get the prince to drop from the sky onto the planet and hover there, looking to
+                        // its beautiful rose.
+                        Animated.sequence([
+                            Animated.timing(this.princeTranslationValue, { toValue: assets.prince.intendedPosition, duration: 3000, easing: Easing.linear }),
+                            Animated.parallel([
+                                Animated.timing(this.princeTranslationOpacityValue, { toValue: 0, duration: 20, easing: Easing.linear }),
+                                Animated.timing(this.princeHoveringOpacityValue, { toValue: 1, duration: 5, easing: Easing.linear }),
+                            ]),
+                            // for some reason loop does not allow me to set an initial state (nor picks up from the previous transformation)
+                            // so I had to introduce another layer, with another prince that is going to be doing the hovering.
+                            Animated.parallel([
+                                Animated.loop(
+                                    Animated.sequence([
+                                        Animated.timing(this.princeHoveringValue, { toValue: { ...assets.prince.intendedPosition, y: assets.prince.intendedPosition.y - 10 }, duration: 500 }),
+                                        Animated.timing(this.princeHoveringValue, { toValue: assets.prince.intendedPosition, duration: 500 }),
+                                    ]),
+                                    { iterations: 1000 }
+                                ),
                                 Animated.sequence([
-                                    Animated.timing(this.princeHoveringValue, { toValue: { ...assets.prince.intendedPosition, y: assets.prince.intendedPosition.y - 10 }, duration: 500 }),
-                                    Animated.timing(this.princeHoveringValue, { toValue: assets.prince.intendedPosition, duration: 500 }),
+                                    this.animateMessage({ messageId: 8, readingTime: 3500 }),
+                                    this.animateMessage({ messageId: 9, readingTime: 3500 }),
+                                    this.animateMessage({ messageId: 10, readingTime: 4000 }),
+                                    this.animateMessage({ messageId: 11, readingTime: 6000, longDismiss: true }),
                                 ]),
-                                { iterations: 1000 }
-                            ),
-                            Animated.sequence([
-                                this.animateMessage({ messageId: 8, readingTime: 3500 }),
-                                this.animateMessage({ messageId: 9, readingTime: 3500 }),
-                                this.animateMessage({ messageId: 10, readingTime: 4000 }),
-                                this.animateMessage({ messageId: 11, readingTime: 10000, longDismiss: true }),
-                            ])
-                        ])
-                    ]),
+                                Animated.sequence([
+                                    Animated.timing(this.finalAreaTranslateValue, { toValue: { x: 0, y: 0 } }),
+                                    Animated.timing(this.finalAreaOpacityValue, { toValue: 1, duration: 2000, delay: 21000 }),
+                                ]),
+                            ]),
+                        ]),
+                    ])
                 ])
-            ])
-        ]).start();
+            ]);
+        this.ongoingAnimation.start();
     };
 
     animateMessage = (input: { messageId: number, readingTime: number, longDismiss?: boolean }) => {
@@ -215,6 +281,7 @@ class AppShell extends React.Component<{}, AppShellState> {
             storyArea: { flex: 1, height, width },
             drawingArea: { flex: 1, height, width, transform: [{ translateY: height - assets.stars.size.height }] },
             messageArea: { flex: 1, height: height / 3, width, backgroundColor: "transparent" },
+            finalArea: { flex: 1, height: height, width, backgroundColor: "transparent" },
             stars: { height: assets.stars.size.height, width: assets.stars.size.width },
             tinkleStars: { height: assets.flickeringStars.size.height, width: assets.flickeringStars.size.width },
             cloud: { height: assets.cloud.size.height, width: assets.cloud.size.width },
