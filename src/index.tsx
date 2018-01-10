@@ -88,10 +88,14 @@ class AppShell extends React.Component<{}, AppShellState> {
         this.finalAreaTranslateValue = new Animated.ValueXY({ x: w, y: 0 });
 
         this.ongoingAnimation = undefined;
+        // Apparently, the code below prevents multiple render invokes.
+        this.restart = this.restart.bind(this);
+        this.playStory = this.playStory.bind(this);
+        this.animateMessage = this.animateMessage.bind(this);
     }
 
     public render() {
-        const { fixedStars, flickeringStars1, flickeringStars2, flickeringStars3, starsOld, planets, cloud, world, prince, cosmos } = assets;
+        const { fixedStars, flickeringStars1, flickeringStars2, flickeringStars3, planets, cloud, world, prince, cosmos } = assets;
         const opacityConfig: Animated.InterpolationConfigType = { inputRange: [0, 1], outputRange: [0, 1] };
         const introOpacity = this.introOpacityValue.interpolate(opacityConfig);
         const introTranslate = this.introAreaTranslateValue.getTranslateTransform();
@@ -163,7 +167,7 @@ class AppShell extends React.Component<{}, AppShellState> {
         );
     }
 
-    restart = () => {
+    private restart() {
         if (this.ongoingAnimation) {
             this.ongoingAnimation.stop();
             this.ongoingAnimation = undefined;
@@ -188,7 +192,7 @@ class AppShell extends React.Component<{}, AppShellState> {
         this.finalAreaOpacityValue.setValue(0);
     }
 
-    playStory = () => {
+    private playStory() {
         // So... What do I have planned for the animation?
         // First, get rid of the initial panel asking the question.
         //   This changes the opacity and moves it out of the way so the user can not click on it any more.
@@ -275,7 +279,7 @@ class AppShell extends React.Component<{}, AppShellState> {
         this.ongoingAnimation.start();
     };
 
-    animateMessage = (input: { messageId: number, readingTime: number, delayBeforeStart?: number, longDismiss?: boolean }) => {
+    private animateMessage(input: { messageId: number, readingTime: number, delayBeforeStart?: number, longDismiss?: boolean }) {
         const longDismissDuration = (input.longDismiss === undefined || input.longDismiss === false) ? 500 : 3000;
         const initialDelay = (input.delayBeforeStart === undefined) ? 0 : input.delayBeforeStart;
         return Animated.sequence([
