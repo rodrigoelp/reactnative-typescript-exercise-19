@@ -13,6 +13,7 @@ export const appFontFamily = Platform.select({
 const globalScale = .24;
 
 export const assets = {
+    cosmos: new Asset(require("./assets/gradientBackground.png"), globalScale, globalScale, { width: 1682 , height: 2480 }),
     starsOld: new Asset(require("./assets/stars.png"), globalScale, globalScale, { width: 1682 , height: 2480 }),
     flickeringStars1: new Asset(require("./assets/stars1.png"), globalScale, globalScale, { width: 1682 , height: 2480 }),
     flickeringStars2: new Asset(require("./assets/stars3.png"), globalScale, globalScale, { width: 1682 , height: 2480 }),

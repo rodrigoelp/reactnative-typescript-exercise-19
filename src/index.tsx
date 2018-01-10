@@ -91,7 +91,7 @@ class AppShell extends React.Component<{}, AppShellState> {
     }
 
     public render() {
-        const { fixedStars, flickeringStars1, flickeringStars2, flickeringStars3, starsOld, planets, cloud, world, prince } = assets;
+        const { fixedStars, flickeringStars1, flickeringStars2, flickeringStars3, starsOld, planets, cloud, world, prince, cosmos } = assets;
         const opacityConfig: Animated.InterpolationConfigType = { inputRange: [0, 1], outputRange: [0, 1] };
         const introOpacity = this.introOpacityValue.interpolate(opacityConfig);
         const introTranslate = this.introAreaTranslateValue.getTranslateTransform();
@@ -118,6 +118,7 @@ class AppShell extends React.Component<{}, AppShellState> {
         return (
             <View style={styles.container}>
                 <View style={this.assetStyles.storyArea}>
+                    <Image source={cosmos.asset} style={{ position: "absolute", top: 0, bottom: 0, left: 0, right: 0, flex: 1, resizeMode: "stretch", opacity: 0.7 }} />
                     <View style={[this.assetStyles.drawingArea, styles.customPosition]}>
                         <Image source={fixedStars.asset} style={[styles.customPosition, this.assetStyles.stars]} />
                         <Animated.Image source={flickeringStars1.asset} style={[styles.customPosition, this.assetStyles.tinkleStars, { opacity: flicker1Opacity }]} />
