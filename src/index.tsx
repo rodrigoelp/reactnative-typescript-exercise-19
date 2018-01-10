@@ -248,22 +248,22 @@ class AppShell extends React.Component<{}, AppShellState> {
                             Animated.timing(this.planetsTranslationValue, { toValue: assets.planets.intendedPosition, duration: 2000, easing: Easing.bounce }),
                         ]),
                         // then, we need the planet hosting the rose (his love)
-                        Animated.timing(this.worldTranslationValue, { toValue: assets.world.intendedPosition, duration: 4000, easing: Easing.linear, delay: 5000 }),
+                        Animated.timing(this.worldTranslationValue, { toValue: assets.world.intendedPosition, duration: 4000, easing: Easing.linear, delay: 5000, useNativeDriver: true }),
                         // finally, let's get the prince to drop from the sky onto the planet and hover there, looking to
                         // its beautiful rose.
                         Animated.sequence([
-                            Animated.timing(this.princeTranslationValue, { toValue: assets.prince.intendedPosition, duration: 3000, easing: Easing.linear, delay: 7000 }),
+                            Animated.timing(this.princeTranslationValue, { toValue: assets.prince.intendedPosition, duration: 3000, easing: Easing.linear, delay: 7000, useNativeDriver: true }),
                             Animated.parallel([
-                                Animated.timing(this.princeTranslationOpacityValue, { toValue: 0, duration: 20, easing: Easing.linear }),
-                                Animated.timing(this.princeHoveringOpacityValue, { toValue: 1, duration: 5, easing: Easing.linear }),
+                                Animated.timing(this.princeTranslationOpacityValue, { toValue: 0, duration: 20, easing: Easing.linear, useNativeDriver: true }),
+                                Animated.timing(this.princeHoveringOpacityValue, { toValue: 1, duration: 5, easing: Easing.linear, useNativeDriver: true }),
                             ]),
                             // for some reason loop does not allow me to set an initial state (nor picks up from the previous transformation)
                             // so I had to introduce another layer, with another prince that is going to be doing the hovering.
                             Animated.parallel([
                                 Animated.loop(
                                     Animated.sequence([
-                                        Animated.timing(this.princeHoveringValue, { toValue: { ...assets.prince.intendedPosition, y: assets.prince.intendedPosition.y - 10 }, duration: 500 }),
-                                        Animated.timing(this.princeHoveringValue, { toValue: assets.prince.intendedPosition, duration: 500 }),
+                                        Animated.timing(this.princeHoveringValue, { toValue: { ...assets.prince.intendedPosition, y: assets.prince.intendedPosition.y - 10 }, duration: 500, useNativeDriver: true }),
+                                        Animated.timing(this.princeHoveringValue, { toValue: assets.prince.intendedPosition, duration: 500, useNativeDriver: true }),
                                     ]),
                                     { iterations: 1000 }
                                 ),
