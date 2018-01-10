@@ -11,6 +11,11 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Deploy to iPhone",
+            "type": "shell",
+            "command": "react-native run-ios --device \"Rod's dev phone\" --configuration Release"
         }
     ]
 }
