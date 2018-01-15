@@ -124,3 +124,11 @@ For this animation in particular I had to do two minor changes:
 1. Identify if there are properties causing a rerender. Not long ago I read [this post](https://medium.com/@adamjacobb/react-native-performance-arrow-functions-binding-3f09cbd57545) and I can't really understand how `this.function = this.function.bind(this)` works in the javascript world although I understand the new function pointer side effect is generated only once.
 
 I am sure there will be more performance issues I need to solve in the future... so far, under this experiment, those were the issues I've found.
+
+## What does the end result look like?
+
+![The little prince animation](./static/theLittlePrinceApp.gif)
+
+But you know... less pixalated and slower animation as I end up adding a lot less frames to the gif version ;)
+
+Enjoy!
